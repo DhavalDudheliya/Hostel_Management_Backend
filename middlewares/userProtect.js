@@ -4,6 +4,7 @@ const User = require("../models/userModel");
 const protectUser = async (req, res, next, role) => {
   try {
     const _token = req.cookies._token;
+    console.log(req.cookies);
     if (!_token) {
       return res.status(401).json({ message: "Token does not exists" });
     }
@@ -18,7 +19,7 @@ const protectUser = async (req, res, next, role) => {
       req.user = root_user;
 
       // Set the secure cookie here
-      res.cookie('_token', _token, { secure: true, sameSite: 'None' });
+      res.cookie("_token", _token, { secure: true, sameSite: "None" });
 
       next();
     } else if (role && root_user.role === role) {
@@ -26,19 +27,21 @@ const protectUser = async (req, res, next, role) => {
       req.user = root_user;
 
       // Set the secure cookie here
-      res.cookie('_token', _token, { secure: true, sameSite: 'None' });
+      res.cookie("_token", _token, { secure: true, sameSite: "None" });
 
       next();
-    }else if(role=="Both" && (root_user.role === "Rector" || root_user.role === "Accountant")){
+    } else if (
+      role == "Both" &&
+      (root_user.role === "Rector" || root_user.role === "Accountant")
+    ) {
       // Open for both Rector and Accountant
       req.user = root_user;
 
       // Set the secure cookie here
-      res.cookie('_token', _token, { secure: true, sameSite: 'None' });
-      
+      res.cookie("_token", _token, { secure: true, sameSite: "None" });
+
       next();
-    } 
-    else {
+    } else {
       // Else
       // Open for all will not have any protection
       res.status(401).json({ message: "Authorization failed" });
