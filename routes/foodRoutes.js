@@ -52,7 +52,7 @@ router.post(
 );
 router.get(
   "/get-foods",
-  // (req, res, next) => protectUser(req, res, next, "Rector"),
+  (req, res, next) => protectUser(req, res, next, "Rector"),
   getFoods
 );
 router.put(
