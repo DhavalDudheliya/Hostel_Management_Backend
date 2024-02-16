@@ -47,7 +47,7 @@ const upload = multer({
 });
 
 /* APIs */
-router.post("/register", upload.single("profilePhoto"), registerUser);
+router.post("/register", registerUser);
 router.post("/login", loginUser);
 
 router.put(

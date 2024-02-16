@@ -46,29 +46,29 @@ const upload = multer({
 /* APIs */
 router.post(
   "/add-food",
-  (req, res, next) => protectUser(req, res, next, "Rector"),
+  (req, res, next) => protectUser(req, res, next, "Manager"),
   upload.single("photo"),
   addFood
 );
 router.get(
   "/get-foods",
-  (req, res, next) => protectUser(req, res, next, "Rector"),
+  (req, res, next) => protectUser(req, res, next, "Manager"),
   getFoods
 );
 router.put(
   "/edit-food/:id",
-  (req, res, next) => protectUser(req, res, next, "Rector"),
+  (req, res, next) => protectUser(req, res, next, "Manager"),
   upload.single("photo"),
   editFood
 );
 router.delete(
   "/delete-food/:id",
-  (req, res, next) => protectUser(req, res, next, "Rector"),
+  (req, res, next) => protectUser(req, res, next, "Manager"),
   deleteFood
 );
 router.get(
   "/get-food/:id",
-  (req, res, next) => protectUser(req, res, next, "Rector"),
+  (req, res, next) => protectUser(req, res, next, "Manager"),
   getFood
 );
 

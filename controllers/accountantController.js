@@ -1,121 +1,158 @@
-const jwt = require("jsonwebtoken");
-const bcrypt = require("bcrypt");
 const User = require("../models/userModel");
-const RollNo = require("../models/rollNoModel");
-const path = require("path");
+const Student = require("../models/studentProfile");
+const feeSchema = require("../models/feesModel.js");
 
-/* SALT */
-const salt = bcrypt.genSaltSync(10);
-
-const getAllStudents = async (req, res) => {
+const addNewFee = async (req, res) => {
   try {
-    const { rollNo } = req.body;
-    let query = { role: "Student" };
+    const { amount, semester, dueDate, feesFor } = req.body;
+    const currentYear = new Date().getFullYear();
 
-    if (rollNo) {
-      query.rollNo = { $regex: `^${rollNo}`, $options: "i" };
+    const students = await Student.find();
+
+    const studentsWithEmptyFees = await Student.find({ fees: [] });
+
+    if (feesFor === "new") {
+      for (const student of studentsWithEmptyFees) {
+        const feeSchema = await createFeeSchema(
+          student._id,
+          amount,
+          currentYear,
+          semester,
+          dueDate
+        );
+        student.fees.push(feeSchema);
+        await student.save();
+      }
+    } else if (feesFor === "all") {
+      // Loop through all students and add fee schema
+      for (const student of students) {
+        const feeSchema = await createFeeSchema(
+          student._id,
+          amount,
+          currentYear,
+          semester,
+          dueDate
+        );
+
+        student.fees.push(feeSchema);
+        await student.save();
+      }
     }
 
-    const students = await User.find(query);
-    return res.status(200).json(students);
+    console.log("Fee schemas added to all students successfully.");
+    res.status(200).json({ message: "Success" });
   } catch (error) {
+    res.status(400).json({ message: "fail" });
     console.log(error);
-    return res.json({ message: `Error occured ${error}` });
   }
 };
 
-const createStudent = async (req, res) => {
+async function createFeeSchema(
+  studentId,
+  amount,
+  cuurentYear,
+  semester,
+  dueDate
+) {
+  const schema = await feeSchema.create({
+    studentId: studentId,
+    amount: amount,
+    year: cuurentYear,
+    semester: semester,
+    dueDate: dueDate,
+  });
+
+  return schema;
+}
+
+const collectFee = async (req, res) => {
   try {
-    const { name, email, phone, password, rollNo } = req.body;
+    const { studentId, feeId, amount, date } = req.body;
 
-    const userExists = await User.findOne({ email });
+    const feeObject = await feeSchema.findById(feeId);
 
-    if (userExists) {
-      return res.status(409).json({ message: "User already exists" });
+    if (!feeObject) {
+      return res.status(404).json({ message: "Fee not found" });
     }
 
-    const hashedPassword = bcrypt.hashSync(password, salt);
+    // console.log(feeObject);
 
-    const userDoc = await User.create({
-      name,
-      email,
-      password: hashedPassword,
-      phone,
-      role: "Student",
-      rollNo,
+    const sum = Number(feeObject.totalAmountPaid) + Number(amount);
+    // console.log(sum);
+    // console.log(feeObject.amount);
+
+    if (sum == feeObject.amount) {
+      feeObject.totalAmountPaid = sum;
+      feeObject.paymentStatus = "Paid";
+    } else if (sum < feeObject.amount) {
+      feeObject.totalAmountPaid = sum;
+      feeObject.paymentStatus = "Partial";
+    } else {
+      res.status(400).json({
+        message: "Paid amount have became more than required amount",
+      });
+      return;
+    }
+
+    const finalAmount = Number(amount);
+
+    feeObject.paidAmount.push({
+      amount: finalAmount,
+      date: date,
     });
 
-    return res.status(200).json(userDoc);
+    await feeObject.save();
+
+    const updatedStudent = await Student.findById(studentId).populate("fees");
+
+    console.log(feeObject);
+    res
+      .status(200)
+      .json({ message: "Paid Successfully", feeObject, updatedStudent });
   } catch (error) {
     console.log(error);
-    return res.json({ message: `Error occured ${error}` });
+    res.status(400).json({ message: "Failed" });
   }
 };
 
-const getCurrentRollNo = async (req, res) => {
+const addPanelty = async (req, res) => {
   try {
-    const currentYear = new Date().getFullYear();
-    const isYear = await RollNo.findOne({ year: currentYear });
+    const { feeId, PanaltyAmount } = req.body;
 
-    if (isYear) {
-      // Find the highest existing roll number for the current year
-      const highestRollNo = await RollNo.findOne({ year: currentYear }).sort({
-        current: -1,
-      }); // Sort in descending order to get the highest roll number
+    const feeObject = await feeSchema.findById(feeId);
 
-      const nextRollNo = highestRollNo ? highestRollNo.current + 1 : 1;
-
-      res.status(200).json({ year: currentYear, current: nextRollNo });
-    } else {
-      RollNo.create({
-        year: currentYear,
-        current: `${currentYear}001`, // Start with 001 for a new year
-      });
-      res
-        .status(200)
-        .json({ year: currentYear, current: Number(`${currentYear}001`) });
+    if (!feeObject) {
+      return res.status(404).json({ message: "Fee not found" });
     }
   } catch (error) {
     console.log(error);
-    return res.json({ message: `Error occured ${error}` });
+    res.status(500).json({ message: "Failed" });
   }
 };
 
-const allocateRollNo = async (req, res) => {
+const getStudentByRollNumber = async (req, res) => {
   try {
-    const currentYear = new Date().getFullYear();
-    const isYear = await RollNo.findOne({ year: currentYear });
-    if (isYear) {
-      isYear.current = isYear.current + 1;
-      await isYear.save();
-      res.status(200).json({ year: currentYear, current: isYear.current });
+    const query = req.query.q;
+    // console.log(query);
+
+    const student = await Student.findOne({ rollNumber: query }).populate(
+      "fees"
+    );
+
+    if (!student) {
+      res.status(404).json({ message: "Student not found" });
     } else {
-      RollNo.create({
-        year: currentYear,
-        current: `${currentYear}001`,
-      });
-      res.status(200).json({ year: currentYear, current: `${currentYear}001` });
+      // console.log(student);
+      res.status(200).json({ message: "Success", student });
     }
   } catch (error) {
-    console.log(error);
-    return res.json({ message: `Error occured ${error}` });
-  }
-};
-
-const getActiveSeries = async (req, res) => {
-  try {
-    const rollNoDoc = await RollNo.find();
-    res.json(rollNoDoc);
-  } catch (error) {
-    console.log(error);
-    return res.json({ message: `Error occured ${error}` });
+    console.log("Error in getting details", error);
+    res.status(400).json({ message: "Failed" });
   }
 };
 
 module.exports = {
-  getAllStudents,
-  getCurrentRollNo,
-  allocateRollNo,
-  getActiveSeries,
-  createStudent,
+  addNewFee,
+  collectFee,
+  getStudentByRollNumber,
 };

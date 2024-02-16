@@ -48,7 +48,7 @@ const getReport = async (req, res) => {
   }
 };
 
-/* RECTOR AND ACCOUNTANT CAN SEE STUDENT'S REPORT */
+/* MANAGER AND ACCOUNTANT CAN SEE STUDENT'S REPORT */
 const getReports = async (req, res) => {
   try {
     const reports = await Report.find({ receiver: req.user.role }).populate("author");
@@ -59,7 +59,7 @@ const getReports = async (req, res) => {
   }
 };
 
-/* RECTOR AND ACCOUNTANT CAN MARK AS READ STUDENT'S REPORT */
+/* MANAGER AND ACCOUNTANT CAN MARK AS READ STUDENT'S REPORT */
 const deleteReport = async (req, res) => {
   try {
     const { id } = req.params;

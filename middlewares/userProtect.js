@@ -4,7 +4,7 @@ const User = require("../models/userModel");
 const protectUser = async (req, res, next, role) => {
   try {
     const _token = req.cookies._token;
-    console.log(req.cookies);
+    // console.log(req.cookies);
     if (!_token) {
       return res.status(401).json({ message: "Token does not exists" });
     }
@@ -32,9 +32,11 @@ const protectUser = async (req, res, next, role) => {
       next();
     } else if (
       role == "Both" &&
-      (root_user.role === "Rector" || root_user.role === "Accountant")
+      (root_user.role === "Manager" ||
+        root_user.role === "Accountant" ||
+        root_user.role === "Admin")
     ) {
-      // Open for both Rector and Accountant
+      // Open for both Manager and Accountant
       req.user = root_user;
 
       // Set the secure cookie here

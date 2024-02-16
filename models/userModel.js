@@ -1,8 +1,20 @@
 const mongoose = require("mongoose");
 
+// Define the enum for roles
+const roles = ["Student", "Manager", "Accountant", "Admin"];
+
 const UserSchema = new mongoose.Schema(
   {
-    name: {
+    role: {
+      type: String,
+      enum: roles,
+      default: "Student",
+    },
+    firstName: {
+      type: String,
+      required: true,
+    },
+    lastName: {
       type: String,
       required: true,
     },
@@ -10,7 +22,11 @@ const UserSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    phone: {
+    personalPhoneNo: {
+      type: String,
+      required: true,
+    },
+    personalWhatsappNo: {
       type: String,
       required: true,
     },
@@ -21,28 +37,12 @@ const UserSchema = new mongoose.Schema(
     profilePhoto: {
       type: String,
     },
-    rollNo: {
-      type: String,
-    },
-    role: {
-      type: String,
-      default: "Student",
-    },
     resetPasswordToken: {
       type: String,
       default: null,
     },
     resetPasswordExpires: {
       type: Date,
-      default: null,
-    },
-    roomNumber: {
-      type: String,
-      default: null,
-    },
-    blockId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Block",
       default: null,
     },
   },

@@ -9,12 +9,13 @@ const bodyParser = require("body-parser");
 // const Razorpay = require("razorpay");
 
 /* ROUTERS */
-const accountantRouter = require("./routes/accountantRoutes");
-const rectorRouter = require("./routes/rectorRoutes");
+const adminRouter = require("./routes/adminRoutes");
+const managerRouter = require("./routes/managerRoutes");
 const studentRouter = require("./routes/studentRoutes");
 const foodRouter = require("./routes/foodRoutes");
 const mealRouter = require("./routes/mealRoutes");
 const userRouter = require("./routes/userRoutes");
+const accountantRouter = require("./routes/accountantRoutes");
 // const paymentRouter = require("./routes/paymentRoutes");
 
 const reportRouter = require("./routes/reportRoutes");
@@ -39,7 +40,7 @@ app.use(
 app.use(express.urlencoded({ extended: false }));
 
 app.use((req, res, next) => {
-  res.setHeader('Permissions-Policy', 'payment=*');
+  res.setHeader("Permissions-Policy", "payment=*");
   next();
 });
 
@@ -62,13 +63,14 @@ connectDB();
 
 /* APIs */
 app.use("/", userRouter);
-app.use("/accountant", accountantRouter);
-app.use("/rector", rectorRouter);
+app.use("/admin", adminRouter);
+app.use("/manager", managerRouter);
 //app.use("/student", studentRouter);
 app.use("/food", foodRouter);
 app.use("/meal", mealRouter);
 app.use("/notice", noticeRouter);
 app.use("/report", reportRouter);
+app.use("/accountant", accountantRouter);
 // app.use("/api", paymentRouter);
 
 app.get("/api/getkey", (req, res) => {

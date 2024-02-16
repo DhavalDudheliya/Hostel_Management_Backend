@@ -15,7 +15,7 @@ const { protectUser } = require("../middlewares/userProtect");
 /* APIs */
 router.post(
   "/add-meal",
-  (req, res, next) => protectUser(req, res, next, "Rector"),
+  (req, res, next) => protectUser(req, res, next, "Manager"),
   addMeal
 );
 router.get(
@@ -25,12 +25,12 @@ router.get(
 );
 router.put(
   "/edit-meal/:id",
-  (req, res, next) => protectUser(req, res, next, "Rector"),
+  (req, res, next) => protectUser(req, res, next, "Manager"),
   editMeal
 );
 router.delete(
   "/delete-meal/:id",
-  (req, res, next) => protectUser(req, res, next, "Rector"),
+  (req, res, next) => protectUser(req, res, next, "Manager"),
   deleteMeal
 );
 

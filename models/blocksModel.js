@@ -13,7 +13,7 @@ const BlocksSchema = new mongoose.Schema(
         },
         capacity: {
           type: Number,
-        },
+        },   
         allocatedStudents: [
           {
             type: mongoose.Schema.Types.ObjectId,
