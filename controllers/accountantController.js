@@ -88,7 +88,7 @@ const collectFee = async (req, res) => {
       feeObject.totalAmountPaid = sum;
       feeObject.paymentStatus = "Partial";
     } else {
-      res.status(400).json({
+      res.status(403).json({
         message: "Paid amount have became more than required amount",
       });
       return;
@@ -151,8 +151,56 @@ const getStudentByRollNumber = async (req, res) => {
   }
 };
 
+const revertFee = async (req, res) => {
+  try {
+    const { subFeeId, feeId, amount } = req.body;
+
+    const fee = await feeSchema.findById(feeId);
+
+    if (!fee) {
+      console.log("Fee not found");
+      return;
+    }
+
+    const paidSchemaIndex = fee.paidAmount.findIndex(
+      (paid) => paid._id.toString() === subFeeId
+    );
+
+    console.log(paidSchemaIndex);
+
+    if (paidSchemaIndex === -1) {
+      console.log("PaidFeeSchema not found");
+    } else {
+      fee.totalAmountPaid = fee.totalAmountPaid - amount;
+      if (fee.totalAmountPaid === 0) {
+        fee.paymentStatus = "Pending";
+      } else if (fee.totalAmountPaid < fee.amount) {
+        fee.paymentStatus = "Partial";
+      }
+
+      fee.paidAmount.splice(paidSchemaIndex, 1);
+
+      await fee.save();
+
+      const updatedStudent = await Student.findById(fee.studentId).populate(
+        "fees"
+      );
+
+      res.status(200).json({
+        message: "PaidSchema deleted successfully",
+        updatedStudent,
+        fee,
+      });
+    }
+  } catch (error) {
+    console.log("Erro while reverting", error);
+    res.status(400).json({ message: "Failed to revert" });
+  }
+};
+
 module.exports = {
   addNewFee,
   collectFee,
   getStudentByRollNumber,
+  revertFee,
 };
