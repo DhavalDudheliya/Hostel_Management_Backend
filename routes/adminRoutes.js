@@ -13,6 +13,11 @@ const {
   createStudent,
   generateRollNumber,
   getSearchSuggestionStudent,
+  allocateBlock,
+  getAllBlocks,
+  allocateStudent,
+  getBlock,
+  deleteBlock,
 } = require("../controllers/adminControllers");
 const { protectUser } = require("../middlewares/userProtect");
 
@@ -60,5 +65,36 @@ router.get(
   (req, res, next) => protectUser(req, res, next, "Admin"),
   getSearchSuggestionStudent
 );
+
+router.post(
+  "/allocate-block",
+  (req, res, next) => protectUser(req, res, next, "Admin"),
+  allocateBlock
+);
+
+router.get(
+  "/get-blocks",
+  (req, res, next) => protectUser(req, res, next, "Admin"),
+  getAllBlocks
+);
+
+router.post(
+  "/allocate-student/:id",
+  (req, res, next) => protectUser(req, res, next, "Admin"),
+  allocateStudent
+);
+
+router.get(
+  "/get-block/:id",
+  (req, res, next) => protectUser(req, res, next, "Admin"),
+  getBlock
+);
+
+router.delete(
+  "/delete-block/:id",
+  (req, res, next) => protectUser(req, res, next, "Admin"),
+  deleteBlock
+);
+
 
 module.exports = router;
