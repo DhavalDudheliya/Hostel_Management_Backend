@@ -250,10 +250,13 @@ const allocateStudent = async (req, res) => {
     const { roomNumber, rollNo } = req.body; // Room number and student ID
 
     const studentDoc = await Student.findOne({ rollNumber: rollNo });
+    // console.log(studentDoc);
     const studentId = studentDoc._id;
+    // console.log(studentId);
 
     // Find the block with the given ID
     const block = await Blocks.findById(id);
+    // console.log(block);
 
     if (!block) {
       return res.status(404).json({ message: "Block not found" });
@@ -317,8 +320,7 @@ const getBlock = async (req, res) => {
     const { id } = req.params;
     const blockDoc = await Blocks.findById(id).populate({
       path: "rooms.allocatedStudents",
-      select:
-        "-password -role -resetPasswordToken -resetPasswordExpires -createdAt -updatedAt",
+      model: "Student",
     });
 
     if (!blockDoc) {

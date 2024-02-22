@@ -117,16 +117,47 @@ const collectFee = async (req, res) => {
 
 const addPanelty = async (req, res) => {
   try {
-    const { feeId, PanaltyAmount } = req.body;
+    const { feeId, penaltyAmount, studentId } = req.body;
 
     const feeObject = await feeSchema.findById(feeId);
 
     if (!feeObject) {
       return res.status(404).json({ message: "Fee not found" });
+    } else {
+      feeObject.penalty = Number(feeObject.penalty) + Number(penaltyAmount);
+      feeObject.amount = Number(feeObject.amount) + Number(penaltyAmount);
+      feeObject.save();
+      const updatedStudent = await Student.findById(studentId).populate("fees");
+      res
+        .status(200)
+        .json({ message: "Panelty Added Succesfully", updatedStudent });
     }
   } catch (error) {
     console.log(error);
-    res.status(500).json({ message: "Failed" });
+    res.status(400).json({ message: "Failed" });
+  }
+};
+
+const clearPanelty = async (req, res) => {
+  try {
+    const { feeId, studentId } = req.body;
+
+    const feeObject = await feeSchema.findById(feeId);
+
+    if (!feeObject) {
+      return res.status(404).json({ message: "Fee not found" });
+    } else {
+      feeObject.amount = Number(feeObject.amount) - Number(feeObject.penalty);
+      feeObject.penalty = 0;
+      feeObject.save();
+      const updatedStudent = await Student.findById(studentId).populate("fees");
+      res
+        .status(200)
+        .json({ message: "Panelty Added Succesfully", updatedStudent });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ message: "Failed" });
   }
 };
 
@@ -203,4 +234,6 @@ module.exports = {
   collectFee,
   getStudentByRollNumber,
   revertFee,
+  addPanelty,
+  clearPanelty,
 };
