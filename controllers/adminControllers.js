@@ -189,19 +189,13 @@ const getSearchSuggestionStudent = async (req, res) => {
         $or: [
           { firstName: { $regex: new RegExp(query), $options: "i" } },
           { lastName: { $regex: new RegExp(query), $options: "i" } },
-          { fatherFirstName: { $regex: new RegExp(query), $options: "i" } },
-          { roomNumber: { $regex: new RegExp(query), $options: "i" } },
         ],
       });
     }
 
     // console.log(students);
 
-    if (students.length === 0) {
-      res.status(400).json({ message: "No Students" });
-    } else {
-      res.status(200).json({ message: "Students ", students });
-    }
+    res.status(200).json({ message: "Students ", students });
   } catch (error) {
     console.log("Error in getting Students: ", error);
     res.status(500).json({ error: "Internal Server Error" });

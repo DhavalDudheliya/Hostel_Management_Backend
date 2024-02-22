@@ -60,11 +60,7 @@ router.post(
   generateRollNumber
 );
 
-router.get(
-  "/getSearchSuggestionStudents",
-  (req, res, next) => protectUser(req, res, next, "Admin"),
-  getSearchSuggestionStudent
-);
+router.get("/getSearchSuggestionStudents", getSearchSuggestionStudent);
 
 router.post(
   "/allocate-block",
@@ -95,6 +91,5 @@ router.delete(
   (req, res, next) => protectUser(req, res, next, "Admin"),
   deleteBlock
 );
-
 
 module.exports = router;
