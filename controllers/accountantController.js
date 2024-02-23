@@ -1,17 +1,27 @@
-const User = require("../models/userModel");
 const Student = require("../models/studentProfile");
-const feeSchema = require("../models/feesModel.js");
+const FeeSchema = require("../models/feesModel.js");
+const FeeMaster = require("../models/feeMasterModel.js");
 
 const addNewFee = async (req, res) => {
   try {
-    const { amount, semester, dueDate, feesFor } = req.body;
+    const { amount, semester, dueDate, feesFor, rollNumber } = req.body;
     const currentYear = new Date().getFullYear();
 
-    const students = await Student.find();
+    let feeMaster = await FeeMaster.find({
+      year: currentYear,
+      semester: semester,
+    });
 
-    const studentsWithEmptyFees = await Student.find({ fees: [] });
+    if (!feeMaster) {
+      feeMaster = await FeeMaster.create({
+        year: currentYear,
+        semester: semester,
+      });
+    }
 
+    // ! This add fee entry into student profile according to feeFor new student, all students and one personal student
     if (feesFor === "new") {
+      const studentsWithEmptyFees = await Student.find({ fees: [] });
       for (const student of studentsWithEmptyFees) {
         const feeSchema = await createFeeSchema(
           student._id,
@@ -24,6 +34,7 @@ const addNewFee = async (req, res) => {
         await student.save();
       }
     } else if (feesFor === "all") {
+      const students = await Student.find();
       // Loop through all students and add fee schema
       for (const student of students) {
         const feeSchema = await createFeeSchema(
@@ -37,10 +48,23 @@ const addNewFee = async (req, res) => {
         student.fees.push(feeSchema);
         await student.save();
       }
+    } else if (feesFor === "personal") {
+      const student = await Student.findOne({ rollNumber: rollNumber });
+
+      const feeSchema = await createFeeSchema(
+        student._id,
+        amount,
+        currentYear,
+        semester,
+        dueDate
+      );
+
+      student.fees.push(feeSchema);
+      await student.save();
     }
 
     console.log("Fee schemas added to all students successfully.");
-    res.status(200).json({ message: "Success" });
+    res.status(200).json({ message: "Success", feeMaster });
   } catch (error) {
     res.status(400).json({ message: "fail" });
     console.log(error);
@@ -54,7 +78,7 @@ async function createFeeSchema(
   semester,
   dueDate
 ) {
-  const schema = await feeSchema.create({
+  const schema = await FeeSchema.create({
     studentId: studentId,
     amount: amount,
     year: cuurentYear,
@@ -69,7 +93,7 @@ const collectFee = async (req, res) => {
   try {
     const { studentId, feeId, amount, date } = req.body;
 
-    const feeObject = await feeSchema.findById(feeId);
+    const feeObject = await FeeSchema.findById(feeId);
 
     if (!feeObject) {
       return res.status(404).json({ message: "Fee not found" });
@@ -119,7 +143,7 @@ const addPanelty = async (req, res) => {
   try {
     const { feeId, penaltyAmount, studentId } = req.body;
 
-    const feeObject = await feeSchema.findById(feeId);
+    const feeObject = await FeeSchema.findById(feeId);
 
     if (!feeObject) {
       return res.status(404).json({ message: "Fee not found" });
@@ -142,7 +166,7 @@ const clearPanelty = async (req, res) => {
   try {
     const { feeId, studentId } = req.body;
 
-    const feeObject = await feeSchema.findById(feeId);
+    const feeObject = await FeeSchema.findById(feeId);
 
     if (!feeObject) {
       return res.status(404).json({ message: "Fee not found" });
@@ -186,7 +210,7 @@ const revertFee = async (req, res) => {
   try {
     const { subFeeId, feeId, amount } = req.body;
 
-    const fee = await feeSchema.findById(feeId);
+    const fee = await FeeSchema.findById(feeId);
 
     if (!fee) {
       console.log("Fee not found");

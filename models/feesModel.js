@@ -18,6 +18,11 @@ const feeSchema = new mongoose.Schema(
       ref: "Student",
       required: true,
     },
+    feeMaster: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "FeeMaster",
+      required: true,
+    },
     amount: { type: Number, required: true },
     penalty: { type: Number, default: 0 },
     dueDate: { type: Date, required: true },
