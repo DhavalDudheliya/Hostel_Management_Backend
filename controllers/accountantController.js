@@ -7,7 +7,7 @@ const addNewFee = async (req, res) => {
     const { amount, semester, dueDate, feesFor, rollNumber } = req.body;
     const currentYear = new Date().getFullYear();
 
-    let feeMaster = await FeeMaster.find({
+    let feeMaster = await FeeMaster.findOne({
       year: currentYear,
       semester: semester,
     });
@@ -19,11 +19,15 @@ const addNewFee = async (req, res) => {
       });
     }
 
+    console.log(feeMaster._id);
+
     // ! This add fee entry into student profile according to feeFor new student, all students and one personal student
     if (feesFor === "new") {
       const studentsWithEmptyFees = await Student.find({ fees: [] });
+
       for (const student of studentsWithEmptyFees) {
         const feeSchema = await createFeeSchema(
+          feeMaster._id,
           student._id,
           amount,
           currentYear,
@@ -38,6 +42,7 @@ const addNewFee = async (req, res) => {
       // Loop through all students and add fee schema
       for (const student of students) {
         const feeSchema = await createFeeSchema(
+          feeMaster._id,
           student._id,
           amount,
           currentYear,
@@ -52,6 +57,7 @@ const addNewFee = async (req, res) => {
       const student = await Student.findOne({ rollNumber: rollNumber });
 
       const feeSchema = await createFeeSchema(
+        feeMaster._id,
         student._id,
         amount,
         currentYear,
@@ -72,6 +78,7 @@ const addNewFee = async (req, res) => {
 };
 
 async function createFeeSchema(
+  feeMasterId,
   studentId,
   amount,
   cuurentYear,
@@ -79,6 +86,7 @@ async function createFeeSchema(
   dueDate
 ) {
   const schema = await FeeSchema.create({
+    feeMasterId: feeMasterId,
     studentId: studentId,
     amount: amount,
     year: cuurentYear,

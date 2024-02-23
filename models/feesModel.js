@@ -18,7 +18,7 @@ const feeSchema = new mongoose.Schema(
       ref: "Student",
       required: true,
     },
-    feeMaster: {
+    feeMasterId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "FeeMaster",
       required: true,

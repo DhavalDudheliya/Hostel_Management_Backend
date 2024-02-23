@@ -10,6 +10,10 @@ const feeMasterSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    totalCollection: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true, versionKey: false }
 );
