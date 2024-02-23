@@ -97,6 +97,46 @@ async function createFeeSchema(
   return schema;
 }
 
+const deleteFee = async (req, res) => {
+  try {
+    const { studentId, feeId } = req.body;
+
+    const feeObject = await FeeSchema.findById(feeId);
+
+    if (!feeObject) {
+      return res.status(404).json({ message: "Fee not found" });
+    }
+
+    const deletedFeeStudent = await Student.findByIdAndUpdate(
+      studentId,
+      {
+        $pull: { fees: feeId },
+      },
+      { new: true }
+    );
+
+    if (!deletedFeeStudent) {
+      // Handle the case where the student with the provided ID is not found
+      console.log("Student not found");
+      return null;
+    }
+
+    const result = await FeeSchema.deleteOne({ _id: feeId });
+    
+    const updatedStudent = await Student.findById(studentId).populate("fees");
+
+    if (result.deletedCount === 1) {
+      res
+        .status(200)
+        .json({ message: "Fee deleted successfully", updatedStudent });
+    }
+
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ message: "Error deleteing Fee" });
+  }
+};
+
 const collectFee = async (req, res) => {
   try {
     const { studentId, feeId, amount, date } = req.body;
@@ -107,11 +147,7 @@ const collectFee = async (req, res) => {
       return res.status(404).json({ message: "Fee not found" });
     }
 
-    // console.log(feeObject);
-
     const sum = Number(feeObject.totalAmountPaid) + Number(amount);
-    // console.log(sum);
-    // console.log(feeObject.amount);
 
     if (sum == feeObject.amount) {
       feeObject.totalAmountPaid = sum;
@@ -268,4 +304,5 @@ module.exports = {
   revertFee,
   addPanelty,
   clearPanelty,
+  deleteFee,
 };

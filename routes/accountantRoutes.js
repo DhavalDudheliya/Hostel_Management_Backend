@@ -9,7 +9,8 @@ const {
   getStudentByRollNumber,
   revertFee,
   addPanelty,
-  clearPanelty
+  clearPanelty,
+  deleteFee,
 } = require("../controllers/accountantController");
 const { protectUser } = require("../middlewares/userProtect");
 
@@ -19,5 +20,6 @@ router.get("/getStudentByRollNumber", getStudentByRollNumber);
 router.post("/revertFee", revertFee);
 router.post("/addPanelty", addPanelty);
 router.post("/clearPanelty", clearPanelty);
+router.post("/deleteFee", deleteFee);
 
 module.exports = router;
