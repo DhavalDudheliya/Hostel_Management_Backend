@@ -1,6 +1,7 @@
 const Student = require("../models/studentProfile");
 const FeeSchema = require("../models/feesModel.js");
 const FeeMaster = require("../models/feeMasterModel.js");
+const { default: mongoose } = require("mongoose");
 
 const addNewFee = async (req, res) => {
   try {
@@ -19,7 +20,7 @@ const addNewFee = async (req, res) => {
       });
     }
 
-    console.log(feeMaster._id);
+    // console.log(feeMaster._id);
 
     // ! This add fee entry into student profile according to feeFor new student, all students and one personal student
     if (feesFor === "new") {
@@ -122,7 +123,7 @@ const deleteFee = async (req, res) => {
     }
 
     const result = await FeeSchema.deleteOne({ _id: feeId });
-    
+
     const updatedStudent = await Student.findById(studentId).populate("fees");
 
     if (result.deletedCount === 1) {
@@ -130,7 +131,6 @@ const deleteFee = async (req, res) => {
         .status(200)
         .json({ message: "Fee deleted successfully", updatedStudent });
     }
-
   } catch (error) {
     console.log(error);
     res.status(400).json({ message: "Error deleteing Fee" });
@@ -173,7 +173,7 @@ const collectFee = async (req, res) => {
 
     const updatedStudent = await Student.findById(studentId).populate("fees");
 
-    console.log(feeObject);
+    // console.log(feeObject);
     res
       .status(200)
       .json({ message: "Paid Successfully", feeObject, updatedStudent });
@@ -265,7 +265,7 @@ const revertFee = async (req, res) => {
       (paid) => paid._id.toString() === subFeeId
     );
 
-    console.log(paidSchemaIndex);
+    // console.log(paidSchemaIndex);
 
     if (paidSchemaIndex === -1) {
       console.log("PaidFeeSchema not found");
@@ -297,6 +297,77 @@ const revertFee = async (req, res) => {
   }
 };
 
+const getDueFeeStudent = async (req, res) => {
+  try {
+    const { year, semester } = req.body;
+
+    const currentDate = new Date();
+
+    if (year === "" && semester == "") {
+      return;
+    } else {
+      if (year === "") {
+        // Find FeeMaster documents
+        const feemasters = await FeeMaster.find({ semester: semester });
+
+        if (feemasters) {
+          // Array to store results
+          const feesArray = [];
+
+          // Iterate through each feemaster
+          for (const feemaster of feemasters) {
+            // Find fees for the current feemaster
+            const fees = await FeeSchema.find({
+              feeMasterId: feemaster._id,
+              dueDate: { $lt: currentDate },
+            }).populate("student");
+
+            // Add the fees to the results array
+            feesArray.push(...fees);
+          }
+          res.status(200).json({ message: "Students Details:", feesArray });
+        }
+      } else if (semester === "") {
+        // Find FeeMaster documents
+        const feemasters = await FeeMaster.find({ year: year });
+
+        if (feemasters) {
+          // Array to store results
+          const feesArray = [];
+
+          // Iterate through each feemaster
+          for (const feemaster of feemasters) {
+            // Find fees for the current feemaster
+            const fees = await FeeSchema.find({
+              feeMasterId: feemaster._id,
+              dueDate: { $lt: currentDate },
+            }).populate("student");
+
+            // Add the fees to the results array
+            feesArray.push(...fees);
+          }
+          res.status(200).json({ message: "Students Details:", feesArray });
+        }
+      } else {
+        const feemaster = await FeeMaster.findOne({
+          year: year,
+          semester: semester,
+        });
+
+        const feesArray = await FeeSchema.find({
+          feeMasterId: feemaster._id,
+          dueDate: { $lt: currentDate },
+        }).populate("student");
+
+        res.status(200).json({ message: "Students Details:", feesArray });
+      }
+    }
+  } catch (error) {
+    console.log("Error in getting student details", error);
+    res.status(400).json({ message: "Failed to get a student details" });
+  }
+};
+
 module.exports = {
   addNewFee,
   collectFee,
@@ -305,4 +376,5 @@ module.exports = {
   addPanelty,
   clearPanelty,
   deleteFee,
+  getDueFeeStudent,
 };

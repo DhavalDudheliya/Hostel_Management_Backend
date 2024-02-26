@@ -11,6 +11,7 @@ const {
   addPanelty,
   clearPanelty,
   deleteFee,
+  getDueFeeStudent,
 } = require("../controllers/accountantController");
 const { protectUser } = require("../middlewares/userProtect");
 
@@ -21,5 +22,6 @@ router.post("/revertFee", revertFee);
 router.post("/addPanelty", addPanelty);
 router.post("/clearPanelty", clearPanelty);
 router.post("/deleteFee", deleteFee);
+router.post("/getDueFeeStudent", getDueFeeStudent);
 
 module.exports = router;
