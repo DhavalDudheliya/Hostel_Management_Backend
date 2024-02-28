@@ -281,7 +281,7 @@ const revertFee = async (req, res) => {
 
       await fee.save();
 
-      const updatedStudent = await Student.findById(fee.studentId).populate(
+      const updatedStudent = await Student.findById(fee.student).populate(
         "fees"
       );
 
@@ -327,7 +327,7 @@ const getDueFeeStudent = async (req, res) => {
           }
           res.status(200).json({ message: "Students Details:", feesArray });
         }
-      } else if (semester === "") {
+      } else if ((semester === "" || semester === "Both") && year !== "") {
         // Find FeeMaster documents
         const feemasters = await FeeMaster.find({ year: year });
 
