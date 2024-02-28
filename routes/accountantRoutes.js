@@ -12,6 +12,7 @@ const {
   clearPanelty,
   deleteFee,
   getDueFeeStudent,
+  generateReceipt,
 } = require("../controllers/accountantController");
 const { protectUser } = require("../middlewares/userProtect");
 
@@ -23,5 +24,6 @@ router.post("/addPanelty", addPanelty);
 router.post("/clearPanelty", clearPanelty);
 router.post("/deleteFee", deleteFee);
 router.post("/getDueFeeStudent", getDueFeeStudent);
+router.post("/generateReceipt", generateReceipt);
 
 module.exports = router;

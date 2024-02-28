@@ -1,7 +1,9 @@
 const Student = require("../models/studentProfile");
 const FeeSchema = require("../models/feesModel.js");
 const FeeMaster = require("../models/feeMasterModel.js");
-const { default: mongoose } = require("mongoose");
+const fs = require("fs-extra");
+const path = require("path");
+const puppeteer = require("puppeteer");
 
 const addNewFee = async (req, res) => {
   try {
@@ -368,6 +370,185 @@ const getDueFeeStudent = async (req, res) => {
   }
 };
 
+const generateReceipt = async (req, res) => {
+  try {
+    const { feeId, subFeeId } = req.body;
+
+    const fee = await FeeSchema.findById(feeId);
+    const student = await Student.findById(fee.student._id);
+    const paidSchemaIndex = fee.paidAmount.findIndex(
+      (paid) => paid._id.toString() === subFeeId
+    );
+
+    console.log(fee.paidAmount[paidSchemaIndex]);
+
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+
+    // Set the content of the receipt
+    const receiptContent = `<!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>PDF Generator</title>
+      <style>
+        body {
+          font-family: 'Arial', sans-serif;
+          margin: 20px;
+          position: relative;
+        }
+
+        body::before {
+          content: "";
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: url('/server/images/logo.png') center/cover no-repeat; 
+          opacity: 0.5; 
+          filter: grayscale(100%); 
+          z-index: -1; 
+        }
+    
+        .header {
+          text-align: center;
+          color: #0066cc;
+          font-size: 24px;
+          font-weight: bold; 
+          margin-bottom: 10px;
+        }
+    
+        .address {
+          text-align: center;
+          margin-bottom: 5px;
+        }
+    
+        .phone {
+          text-align: center;
+          margin-bottom: 20px;
+        }
+    
+        hr {
+          border: 1px solid #ccc;
+          margin: 10px 0;
+        }
+    
+        .name-date {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 10px;
+          font-weight: 700px;
+        }
+    
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 10px;
+        }
+    
+        th, td {
+          border: 1px solid #ccc;
+          padding: 8px;
+          text-align: left;
+        }
+    
+        th {
+          background-color: #f2f2f2 !important;
+        }
+    
+        .signature {
+          text-align: right;
+          margin-top: 65px;
+          margin-right: 60px;
+        }
+    
+        .footer {
+          position: absolute;
+          bottom: 20px;
+          left: 20px;
+          right: 20px;
+          text-align: center;
+        }
+      </style>
+    </head>
+    <body>
+    
+      <div>
+        <div class="header">
+        BAPS SWAMINARAYAN CHHATRALAYA
+        </div>
+        <div class="address">
+        Nutan Park Society, Nadiad, Gujarat 387001
+        </div>
+        <div class="phone">
+          Contact: 9998990445
+        </div>
+        <hr>
+        <div class="name-date">
+          <div class="name-ph">
+          <p>Name: ${student.firstName} ${student.lastName}</p>
+          <p>Phone No: ${student.mobileNumber} </p>
+          </div>
+          <p>Date: ${new Date().toLocaleDateString()}</p>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Year</th>
+              <th>Fee Type</th>
+              <th>Fee Amount</th>
+              <th>Penalty</th>
+              <th>Fee Paid</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="background-color: #f5f5f5;">
+              <td>${fee.year}</td>
+              <td>${fee.semester} Fee</td>
+              <td>₹${fee.amount}</td>
+              <td>₹${fee.penalty}</td>
+              <td>₹${fee.paidAmount[paidSchemaIndex].amount}</td>
+              <td>${new Date().toLocaleDateString()}</td>
+            </tr>
+            <!-- Add more rows as needed -->
+          </tbody>
+        </table>
+        <div class="signature">
+          <p>Signature</p>
+        </div>
+      </div>
+    </body>
+    </html>`;
+
+    await page.setContent(receiptContent, { waitUntil: "networkidle0" });
+
+    // Generate PDF from the page
+    const pdfBuffer = await page.pdf({
+      width: "120mm",
+      height: "220mm",
+      landscape: true,
+    });
+
+    await browser.close();
+
+    // Set the appropriate response headers for a PDF file
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=fee_receipt.pdf"
+    );
+
+    // Send the PDF as the response
+    res.send(pdfBuffer);
+  } catch (error) {
+    console.log("Error in Generating Receipt", error);
+    res.status(400).json({ message: "Error in generating receipt", error });
+  }
+};
+
 module.exports = {
   addNewFee,
   collectFee,
@@ -377,4 +558,5 @@ module.exports = {
   clearPanelty,
   deleteFee,
   getDueFeeStudent,
+  generateReceipt,
 };
