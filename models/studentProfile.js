@@ -128,6 +128,7 @@ const StudentProfileSchema = new mongoose.Schema(
     },
     admissionDate: { type: Date, default: Date.now },
     fees: [{ type: mongoose.Schema.Types.ObjectId, ref: "Fee" }],
+    leaves: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Leave' }],
   },
   { timestamps: true, versionKey: false }
 );

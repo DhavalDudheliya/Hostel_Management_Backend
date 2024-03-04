@@ -1,8 +1,6 @@
 const Student = require("../models/studentProfile");
 const FeeSchema = require("../models/feesModel.js");
 const FeeMaster = require("../models/feeMasterModel.js");
-const fs = require("fs-extra");
-const path = require("path");
 const puppeteer = require("puppeteer");
 
 const addNewFee = async (req, res) => {
@@ -90,7 +88,7 @@ async function createFeeSchema(
 ) {
   const schema = await FeeSchema.create({
     feeMasterId: feeMasterId,
-    studentId: studentId,
+    student: studentId,
     amount: amount,
     year: cuurentYear,
     semester: semester,
