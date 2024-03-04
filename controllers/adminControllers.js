@@ -1,10 +1,12 @@
-const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const User = require("../models/userModel");
 const Student = require("../models/studentProfile");
 const RollNo = require("../models/rollNoModel");
 const Blocks = require("../models/blocksModel");
-const path = require("path");
+const multer = require("multer");
+
+const storage = multer.memoryStorage(); // Store files in memory (you can adjust this based on your requirements)
+const upload = multer({ storage: storage });
 
 /* SALT */
 const salt = bcrypt.genSaltSync(10);
@@ -32,10 +34,10 @@ const createStudent = async (req, res) => {
       rollNumber,
       firstName,
       lastName,
-      Street,
+      street,
       village,
       taluka,
-      city,
+      district,
       postalCode,
       dateOfBirth,
       cast,
@@ -57,6 +59,16 @@ const createStudent = async (req, res) => {
       work,
     } = req.body;
 
+    console.log(req.body);
+
+    let profilePhoto;
+
+    if (req.file) {
+      profilePhoto = req.file.filename;
+    }
+
+    console.log(profilePhoto);
+
     const userExists = await Student.findOne({ email });
 
     if (userExists) {
@@ -77,10 +89,10 @@ const createStudent = async (req, res) => {
       firstName,
       lastName,
       address: {
-        Street,
+        street,
         village,
         taluka,
-        city,
+        district,
         postalCode,
       },
       dateOfBirth,
@@ -101,6 +113,7 @@ const createStudent = async (req, res) => {
       fatherWhatsappNo,
       fatherEmail,
       work,
+      profilePhoto,
     });
 
     const userDoc = await User.create({
@@ -111,12 +124,17 @@ const createStudent = async (req, res) => {
       personalPhoneNo: mobileNumber,
       personalWhatsappNo: whatsappNumber,
       password: hashedPassword,
+      profilePhoto,
     });
 
     console.log(userDoc);
     console.log(studentDoc);
 
-    return res.status(200).json(studentDoc);
+    if (studentDoc) {
+      return res.status(200).json(studentDoc);
+    } else {
+      return res.status(400).json({ message: "Cannot edd Student" });
+    }
   } catch (error) {
     console.log(error);
     return res.json({ message: `Error occured ${error}` });
@@ -164,10 +182,8 @@ const generateRollNumber = async (req, res) => {
 const getSearchSuggestionStudent = async (req, res) => {
   try {
     const query = req.query.q;
-    console.log(query);
 
     const isNumeric = !isNaN(query);
-    console.log(isNumeric);
 
     let students;
 
@@ -180,7 +196,6 @@ const getSearchSuggestionStudent = async (req, res) => {
         rollNumber.includes(query)
       );
       const numericRollNumbers = matchingRollNumbers.map(Number);
-      console.log(matchingRollNumbers);
       students = await Student.find({
         rollNumber: { $in: numericRollNumbers },
       });

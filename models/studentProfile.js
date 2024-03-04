@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const addressSchema = new mongoose.Schema({
-  Street: {
+  street: {
     type: String,
     require: true,
   },
@@ -9,7 +9,7 @@ const addressSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  city: {
+  district: {
     type: String,
     require: true,
   },
@@ -126,9 +126,12 @@ const StudentProfileSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    profilePhoto: {
+      type: String,
+    },
     admissionDate: { type: Date, default: Date.now },
     fees: [{ type: mongoose.Schema.Types.ObjectId, ref: "Fee" }],
-    leaves: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Leave' }],
+    leaves: [{ type: mongoose.Schema.Types.ObjectId, ref: "Leave" }],
   },
   { timestamps: true, versionKey: false }
 );

@@ -1,5 +1,4 @@
 const Report = require("../models/reportModel");
-const User = require("../models/userModel");
 const fs = require("fs");
 const path = require("path");
 
