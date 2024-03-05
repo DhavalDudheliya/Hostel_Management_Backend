@@ -2,13 +2,13 @@ const express = require("express");
 
 const router = express.Router();
 
-const { applyLeave } = require("../controllers/leaveController");
+const { applyPersonalLeave } = require("../controllers/leaveController");
 const { protectUser } = require("../middlewares/userProtect");
 
 router.post(
-  "/applyLeave",
+  "/applyPersonalLeave",
   //   (req, res, next) => protectUser(req, res, next, "Admin"),
-  applyLeave
+  applyPersonalLeave
 );
 
 module.exports = router;

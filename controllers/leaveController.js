@@ -1,26 +1,28 @@
 const Student = require("../models/studentProfile");
 const Leave = require("../models/leaveModel");
 
-const applyLeave = async (req, res) => {
+const applyPersonalLeave = async (req, res) => {
   try {
-    const { studentId, startDate, endDate, reason } = req.body;
+    const { rollNumber, startDate, endDate, reason } = req.body;
 
     // Validate inputs (you might need more thorough validation)
-    if (!studentId || !startDate || !endDate || !reason) {
+    if (!rollNumber || !startDate || !endDate || !reason) {
       return res
         .status(400)
         .json({ message: "Incomplete information for leave application" });
     }
 
+    console.log(req.body);
+
     // Check if the student exists
-    const student = await Student.findById(studentId);
+    const student = await Student.findOne({ rollNumber: rollNumber });
     if (!student) {
       return res.status(404).json({ message: "Student not found" });
     }
 
     // Create a leave application
     const leaveApplication = new Leave({
-      student: studentId,
+      student: student._id,
       startDate,
       endDate,
       reason,
@@ -52,5 +54,5 @@ const applyBulkLeave = async (req, res) => {
 };
 
 module.exports = {
-  applyLeave,
+  applyPersonalLeave,
 };
