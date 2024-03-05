@@ -16,6 +16,7 @@ const foodRouter = require("./routes/foodRoutes");
 const mealRouter = require("./routes/mealRoutes");
 const userRouter = require("./routes/userRoutes");
 const accountantRouter = require("./routes/accountantRoutes");
+const leaveRouter = require("./routes/leaveRoutes");
 // const paymentRouter = require("./routes/paymentRoutes");
 
 const reportRouter = require("./routes/reportRoutes");
@@ -71,6 +72,7 @@ app.use("/meal", mealRouter);
 app.use("/notice", noticeRouter);
 app.use("/report", reportRouter);
 app.use("/accountant", accountantRouter);
+app.use("/leave", leaveRouter);
 // app.use("/api", paymentRouter);
 
 app.get("/api/getkey", (req, res) => {
