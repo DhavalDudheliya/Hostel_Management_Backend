@@ -1,6 +1,6 @@
 const Student = require("../models/studentProfile");
 const Leave = require("../models/leaveModel");
-const moment = require('moment-timezone');
+const moment = require("moment");
 
 const applyPersonalLeave = async (req, res) => {
   try {
@@ -21,15 +21,15 @@ const applyPersonalLeave = async (req, res) => {
     if (!student) {
       return res.status(404).json({ message: "Student not found" });
     }
- 
-     // Create a leave application
-     const leaveSchema = new Leave({
-       student: student._id,
-       startDate: startDate,
-       endDate: endDate,
-       reason,
-       status: "approved", 
-     });
+
+    // Create a leave application
+    const leaveSchema = new Leave({
+      student: student._id,
+      startDate: startDate,
+      endDate: endDate,
+      reason,
+      status: "approved",
+    });
 
     // Save the leave application
     await leaveSchema.save();
@@ -98,7 +98,40 @@ async function createLeaveSchema(studentId, startDate, endDate, reason) {
   return schema;
 }
 
+const findStudentsOnLeave = async (req, res) => {
+  try {
+    const currentDate = new Date();
+    const formattedCurrentDate = moment(currentDate).format("DDMMYYYY");
+
+    // Find leave applications that overlap with the current date
+    const leaveApplications = await Leave.find({
+      startDate: { $lte: formattedCurrentDate }, // Leave starts before or on the current date
+      endDate: { $gte: formattedCurrentDate }, // Leave ends on or after the current date
+    }).populate("student");
+
+    // // Extract student IDs from leave applications
+    // const studentIds = leaveApplications.map((leave) => leave.student);
+
+    // // Find students based on extracted student IDs
+    // const studentsOnLeave = await Student.find({
+    //   _id: { $in: studentIds },
+    // });
+
+    if (!leaveApplications) {
+      res.status(404).json({ message: "Students not found" });
+    }
+
+    return res
+      .status(200)
+      .json({ message: "Students on leave", leaveApplications });
+  } catch (error) {
+    console.error("Error finding students on leave:", error);
+    throw error; // Handle or log the error as needed
+  }
+};
+
 module.exports = {
   applyPersonalLeave,
   applyBulkLeave,
+  findStudentsOnLeave,
 };
