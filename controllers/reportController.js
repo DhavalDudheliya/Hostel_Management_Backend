@@ -30,7 +30,7 @@ const addReport = async (req, res) => {
     return res.status(200).json(reportDoc);
   } catch (error) {
     console.log(error);
-    return res.json({ message: `Error occured ${error}` });
+    return res.status(500).json({ message: `Error occured ${error}` });
   }
 };
 

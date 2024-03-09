@@ -40,11 +40,6 @@ app.use(
 );
 app.use(express.urlencoded({ extended: false }));
 
-// app.use((req, res, next) => {
-//   res.setHeader("Permissions-Policy", "payment=*");
-//   next();
-// });
-
 app.use("/uploads", express.static(__dirname + "/uploads"));
 app.use("/uploadsReport", express.static(__dirname + "/uploadsReport"));
 app.use("/uploadsFood", express.static(__dirname + "/uploadsFood"));

@@ -48,7 +48,7 @@ const registerUser = async (req, res) => {
     return res.status(200).json(userDoc);
   } catch (error) {
     console.log(error);
-    return res.json({ message: `Error occured ${error}` });
+    return res.status(400).json({ message: `Error occured ${error}` });
   }
 };
 
@@ -83,7 +83,7 @@ const loginUser = async (req, res) => {
       .json(userExists);
   } catch (error) {
     console.log(error);
-    return res.json({ message: `Error occured ${error}` });
+    return res.status(400).json({ message: `Error occured ${error}` });
   }
 };
 
@@ -98,7 +98,7 @@ const logoutUser = (req, res) => {
     }
   } catch (error) {
     console.log(error);
-    return res.json({ message: `Error occured ${error}` });
+    return res.status(400).json({ message: `Error occured ${error}` });
   }
 };
 
@@ -108,7 +108,7 @@ const getProfile = (req, res) => {
     return res.status(201).json(req.user);
   } catch (error) {
     console.log(error);
-    return res.json({ message: `Error occured ${error}` });
+    return res.status(400).json({ message: `Error occured ${error}` });
   }
 };
 
@@ -142,7 +142,7 @@ const userProfilePhotoUpdate = async (req, res) => {
     }
   } catch (error) {
     console.log(error);
-    return res.json({ message: `Error occured ${error}` });
+    return res.status(400).json({ message: `Error occured ${error}` });
   }
 };
 
@@ -155,7 +155,7 @@ const updateProfile = async (req, res) => {
     const studentDoc = await User.findById(id);
 
     if (!studentDoc) {
-      return res.status(400).json({ message: "User does not exists" });
+      return res.status(404).json({ message: "User does not exists" });
     }
 
     studentDoc.set({
@@ -166,7 +166,7 @@ const updateProfile = async (req, res) => {
     res.status(200).json(studentDoc);
   } catch (error) {
     console.log(error);
-    return res.json({ message: `Error occured ${error}` });
+    return res.status(400).json({ message: `Error occured ${error}` });
   }
 };
 
@@ -1422,7 +1422,7 @@ const forgotPassword = async (req, res) => {
     res.status(200).json({ message: "Reset email sent successfully" });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(400).json({ message: "Internal server error" });
   }
 };
 
@@ -1450,7 +1450,7 @@ const resetPassword = async (req, res) => {
     res.status(200).json({ message: "Password reset successfully" });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(400).json({ message: "Internal server error" });
   }
 };
 

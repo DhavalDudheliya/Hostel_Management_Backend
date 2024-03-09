@@ -35,6 +35,11 @@ const addNewFee = async (req, res) => {
           semester,
           dueDate
         );
+
+        if (!feeSchema) {
+          return res.status(400).json({ message: "Cannot make fee Schema" });
+        }
+
         student.fees.push(feeSchema);
         await student.save();
       }
@@ -51,6 +56,10 @@ const addNewFee = async (req, res) => {
           dueDate
         );
 
+        if (!feeSchema) {
+          return res.status(400).json({ message: "Cannot make fee Schema" });
+        }
+
         student.fees.push(feeSchema);
         await student.save();
       }
@@ -66,14 +75,22 @@ const addNewFee = async (req, res) => {
         dueDate
       );
 
+      if (!feeSchema) {
+        return res.status(400).json({ message: "Cannot make fee Schema" });
+      }
+
       student.fees.push(feeSchema);
       await student.save();
+    }
+
+    if (!feeMaster) {
+      return res.status(400).json({ message: "Cannot make fee master" });
     }
 
     console.log("Fee schemas added to all students successfully.");
     res.status(200).json({ message: "Success", feeMaster });
   } catch (error) {
-    res.status(400).json({ message: "fail" });
+    res.status(500).json({ message: "fail" });
     console.log(error);
   }
 };
@@ -133,7 +150,7 @@ const deleteFee = async (req, res) => {
     }
   } catch (error) {
     console.log(error);
-    res.status(400).json({ message: "Error deleteing Fee" });
+    res.status(500).json({ message: "Error deleteing Fee" });
   }
 };
 

@@ -42,7 +42,7 @@ const applyPersonalLeave = async (req, res) => {
       .json({ message: "Leave application submitted successfully" });
   } catch (error) {
     console.error("Error applying for leave:", error);
-    res.status(500).json({ message: "Internal Server Error" });
+    res.status(400).json({ message: "Internal Server Error" });
   }
 };
 
@@ -81,7 +81,7 @@ const applyBulkLeave = async (req, res) => {
       .json({ message: "Leave application submitted successfully" });
   } catch (error) {
     console.error("Error applying for leave:", error);
-    res.status(500).json({ message: "Internal Server Error" });
+    res.status(400).json({ message: "Internal Server Error" });
   }
 };
 
@@ -109,14 +109,6 @@ const findStudentsOnLeave = async (req, res) => {
       endDate: { $gte: formattedCurrentDate }, // Leave ends on or after the current date
     }).populate("student");
 
-    // // Extract student IDs from leave applications
-    // const studentIds = leaveApplications.map((leave) => leave.student);
-
-    // // Find students based on extracted student IDs
-    // const studentsOnLeave = await Student.find({
-    //   _id: { $in: studentIds },
-    // });
-
     if (!leaveApplications) {
       res.status(404).json({ message: "Students not found" });
     }
@@ -125,8 +117,9 @@ const findStudentsOnLeave = async (req, res) => {
       .status(200)
       .json({ message: "Students on leave", leaveApplications });
   } catch (error) {
-    console.error("Error finding students on leave:", error);
-    throw error; // Handle or log the error as needed
+    return res
+      .status(400)
+      .json({ message: "Error finding students on leave:", error });
   }
 };
 

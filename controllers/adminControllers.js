@@ -24,7 +24,7 @@ const getAllStudents = async (req, res) => {
     return res.status(200).json(students);
   } catch (error) {
     console.log(error);
-    return res.json({ message: `Error occured ${error}` });
+    return res.status(400).json({ message: `Error occured ${error}` });
   }
 };
 
@@ -133,21 +133,21 @@ const createStudent = async (req, res) => {
     if (studentDoc) {
       return res.status(200).json(studentDoc);
     } else {
-      return res.status(400).json({ message: "Cannot edd Student" });
+      return res.status(400).json({ message: "Cannot add Student" });
     }
   } catch (error) {
     console.log(error);
-    return res.json({ message: `Error occured ${error}` });
+    return res.status(400).json({ message: `Error occured ${error}` });
   }
 };
 
 const getActiveSeries = async (req, res) => {
   try {
     const rollNoDoc = await RollNo.find();
-    res.json(rollNoDoc);
+    res.statusjson(rollNoDoc);
   } catch (error) {
     console.log(error);
-    return res.json({ message: `Error occured ${error}` });
+    return res.status(400).json({ message: `Error occured ${error}` });
   }
 };
 
@@ -175,7 +175,7 @@ const generateRollNumber = async (req, res) => {
     res.json({ randomNumber });
   } catch (error) {
     console.log("Error generating roll number:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    res.status(400).json({ error: "Internal Server Error" });
   }
 };
 
@@ -213,7 +213,7 @@ const getSearchSuggestionStudent = async (req, res) => {
     res.status(200).json({ message: "Students ", students });
   } catch (error) {
     console.log("Error in getting Students: ", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    res.status(400).json({ error: "Internal Server Error" });
   }
 };
 
@@ -239,7 +239,7 @@ const allocateBlock = async (req, res) => {
     }
   } catch (error) {
     console.log(error);
-    return res.json({ message: `Error occured ${error}` });
+    return res.status(400).json({ message: `Error occured ${error}` });
   }
 };
 
@@ -320,7 +320,7 @@ const allocateStudent = async (req, res) => {
     return res.status(200).json({ roomInfo });
   } catch (error) {
     console.log(error);
-    return res.status(500).json({ message: `Error occurred: ${error}` });
+    return res.status(400).json({ message: `Error occurred: ${error}` });
   }
 };
 
@@ -339,7 +339,7 @@ const getBlock = async (req, res) => {
     return res.status(200).json(blockDoc);
   } catch (error) {
     console.log(error);
-    return res.json({ message: `Error occurred ${error}` });
+    return res.status(400).json({ message: `Error occurred ${error}` });
   }
 };
 
@@ -373,7 +373,7 @@ const deleteBlock = async (req, res) => {
     return res.json({ message: "Block deleted successfully" });
   } catch (error) {
     console.log(error);
-    return res.status(500).json({ message: `Error occurred: ${error}` });
+    return res.status(400).json({ message: `Error occurred: ${error}` });
   }
 };
 

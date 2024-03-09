@@ -39,7 +39,7 @@ const addMeal = async (req, res) => {
     return res.status(200).json(mealDoc);
   } catch (error) {
     console.log(error);
-    return res.json({ message: `Error occured ${error}` });
+    return res.status(400).json({ message: `Error occured ${error}` });
   }
 };
 
@@ -65,7 +65,7 @@ const getMeals = async (req, res) => {
     }
   } catch (error) {
     console.log(error);
-    return res.json({ message: `Error occured ${error}` });
+    return res.status(400).json({ message: `Error occured ${error}` });
   }
 };
 
@@ -90,7 +90,7 @@ const editMeal = async (req, res) => {
     res.status(200).json(mealDoc);
   } catch (error) {
     console.log(error);
-    return res.json({ message: `Error occured ${error}` });
+    return res.status(400).json({ message: `Error occured ${error}` });
   }
 };
 
@@ -109,7 +109,7 @@ const deleteMeal = async (req, res) => {
     return res.status(200).json({ message: "Meal deleted" });
   } catch (error) {
     console.log(error);
-    return res.json({ message: `Error occured ${error}` });
+    return res.status(400).json({ message: `Error occured ${error}` });
   }
 };
 
