@@ -397,7 +397,7 @@ const generateReceipt = async (req, res) => {
 
     console.log(fee.paidAmount[paidSchemaIndex]);
 
-    const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
 
     // Set the content of the receipt
