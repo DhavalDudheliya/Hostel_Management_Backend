@@ -19,8 +19,8 @@ const protectUser = async (req, res, next, role) => {
       // Open for all 3
       req.user = root_user;
 
-      // Set the secure cookie here
-      res.cookie("_token", _token, { secure: true, sameSite: "None" });
+      // // Set the secure cookie here
+      // res.cookie("_token", _token, { secure: true, sameSite: "None" });
 
       next();
     } else if (role && root_user.role === role) {
@@ -28,7 +28,7 @@ const protectUser = async (req, res, next, role) => {
       req.user = root_user;
 
       // Set the secure cookie here
-      res.cookie("_token", _token, { secure: true, sameSite: "None" });
+      // res.cookie("_token", _token, { secure: true, sameSite: "None" });
 
       next();
     } else if (
@@ -41,7 +41,7 @@ const protectUser = async (req, res, next, role) => {
       req.user = root_user;
 
       // Set the secure cookie here
-      res.cookie("_token", _token, { secure: true, sameSite: "None" });
+      // res.cookie("_token", _token, { secure: true, sameSite: "None" });
 
       next();
     } else {
