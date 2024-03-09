@@ -12,6 +12,7 @@ const protectUser = async (req, res, next, role) => {
 
     root_user = await User.findOne({
       _id: verifiedUser._id,
+      _token: _token,
     });
 
     if (role === undefined) {
