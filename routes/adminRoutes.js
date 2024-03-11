@@ -45,6 +45,7 @@ const {
   allocateStudent,
   getBlock,
   deleteBlock,
+  userProfilePhotoUpdate,
 } = require("../controllers/adminControllers");
 const { protectUser } = require("../middlewares/userProtect");
 
@@ -106,6 +107,13 @@ router.delete(
   "/delete-block/:id",
   (req, res, next) => protectUser(req, res, next, "Admin"),
   deleteBlock
+);
+
+router.put(
+  "/profile-photo-update",
+  (req, res, next) => protectUser(req, res, next),
+  upload.single("profilePhoto"),
+  userProfilePhotoUpdate
 );
 
 module.exports = router;

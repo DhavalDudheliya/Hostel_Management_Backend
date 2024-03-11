@@ -12,7 +12,6 @@ const {
   loginUser,
   logoutUser,
   getProfile,
-  userProfilePhotoUpdate,
   updateProfile,
   forgotPassword,
   resetPassword,
@@ -50,27 +49,28 @@ const upload = multer({
 router.post("/register", registerUser);
 router.post("/login", loginUser);
 
-router.put(
-  "/profile-photo-update",
-  (req, res, next) => protectUser(req, res, next),
-  upload.single("profilePhoto"),
-  userProfilePhotoUpdate
-);
 router.put("/update-profile/:id", protectUser, updateProfile);
 
 router.post(
   "/logout",
   (req, res, next) => protectUser(req, res, next),
   logoutUser
-);
-router.get(
-  "/profile",
-  (req, res, next) => protectUser(req, res, next),
-  getProfile
-);
-
+  );
+  router.get(
+    "/profile",
+    (req, res, next) => protectUser(req, res, next),
+    getProfile
+    );
+    
 router.post("/forgot-password", forgotPassword);
 
 router.post("/reset-password/:token", resetPassword);
 
 module.exports = router;
+
+// router.put(
+//   "/profile-photo-update",
+//   (req, res, next) => protectUser(req, res, next),
+//   upload.single("profilePhoto"),
+//   userProfilePhotoUpdate
+// );

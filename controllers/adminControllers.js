@@ -3,6 +3,8 @@ const User = require("../models/userModel");
 const Student = require("../models/studentProfile");
 const RollNo = require("../models/rollNoModel");
 const Blocks = require("../models/blocksModel");
+const fs = require("fs");
+const path = require("path");
 const multer = require("multer");
 
 const storage = multer.memoryStorage(); // Store files in memory (you can adjust this based on your requirements)
@@ -34,6 +36,7 @@ const createStudent = async (req, res) => {
       rollNumber,
       firstName,
       lastName,
+      bloodGroup,
       street,
       village,
       taluka,
@@ -88,6 +91,7 @@ const createStudent = async (req, res) => {
       rollNumber,
       firstName,
       lastName,
+      bloodGroup,
       address: {
         street,
         village,
@@ -377,6 +381,46 @@ const deleteBlock = async (req, res) => {
   }
 };
 
+/* USER PROFILE PHOTO UPDATE*/
+const userProfilePhotoUpdate = async (req, res) => {
+  try {
+    let profilePhoto;
+    if (req.file) {
+      profilePhoto = req.file.filename;
+    }
+
+    const { studentId } = req.body;
+
+    const studentDoc = await Student.findById(studentId);
+
+    // Delete previous profile photo
+    if (studentDoc.profilePhoto) {
+      const filePath = path.join("uploads", studentDoc.profilePhoto);
+      fs.unlink(filePath, (err) => {
+        if (err) {
+          console.log("Error deleting previous profile photo:", err);
+        }
+      });
+    }
+
+    if (studentDoc) {
+      studentDoc.set({
+        profilePhoto,
+      });
+      await studentDoc.save();
+      const UpdatedStudent = await Student.findById(studentId);
+      res
+        .status(200)
+        .json({ message: "Photo Updated Succesfully", UpdatedStudent });
+    } else {
+      res.status(404).json({ message: "Student not found" });
+    }
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json({ message: `Error occured ${error}` });
+  }
+};
+
 module.exports = {
   getAllStudents,
   getActiveSeries,
@@ -388,6 +432,7 @@ module.exports = {
   allocateStudent,
   getBlock,
   deleteBlock,
+  userProfilePhotoUpdate,
 };
 
 // const allocateRollNo = async (req, res) => {

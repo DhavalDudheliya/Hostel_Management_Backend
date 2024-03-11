@@ -1,8 +1,7 @@
 const User = require("../models/userModel");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-const fs = require("fs");
-const path = require("path");
+
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
 
@@ -114,39 +113,7 @@ const getProfile = (req, res) => {
   }
 };
 
-/* USER PROFILE PHOTO UPDATE*/
-const userProfilePhotoUpdate = async (req, res) => {
-  try {
-    let profilePhoto;
-    if (req.file) {
-      profilePhoto = req.file.filename;
-    }
 
-    const userDoc = await User.findById(req.user._id);
-    // Delete previous profile photo
-    if (userDoc.profilePhoto) {
-      const filePath = path.join("uploads", userDoc.profilePhoto);
-      fs.unlink(filePath, (err) => {
-        if (err) {
-          console.log("Error deleting previous profile photo:", err);
-        }
-      });
-    }
-
-    if (userDoc) {
-      userDoc.set({
-        profilePhoto,
-      });
-      await userDoc.save();
-      res.json("Photo uploaded");
-    } else {
-      res.status(404).json({ message: "User not found" });
-    }
-  } catch (error) {
-    console.log(error);
-    return res.status(400).json({ message: `Error occured ${error}` });
-  }
-};
 
 /* UPDATE STIDENT PROFILE */
 const updateProfile = async (req, res) => {
@@ -1461,8 +1428,41 @@ module.exports = {
   loginUser,
   logoutUser,
   getProfile,
-  userProfilePhotoUpdate,
   updateProfile,
   forgotPassword,
   resetPassword,
 };
+
+/* USER PROFILE PHOTO UPDATE*/
+// const userProfilePhotoUpdate = async (req, res) => {
+//   try {
+//     let profilePhoto;
+//     if (req.file) {
+//       profilePhoto = req.file.filename;
+//     }
+
+//     const userDoc = await User.findById(req.user._id);
+//     // Delete previous profile photo
+//     if (userDoc.profilePhoto) {
+//       const filePath = path.join("uploads", userDoc.profilePhoto);
+//       fs.unlink(filePath, (err) => {
+//         if (err) {
+//           console.log("Error deleting previous profile photo:", err);
+//         }
+//       });
+//     }
+
+//     if (userDoc) {
+//       userDoc.set({
+//         profilePhoto,
+//       });
+//       await userDoc.save();
+//       res.json("Photo uploaded");
+//     } else {
+//       res.status(404).json({ message: "User not found" });
+//     }
+//   } catch (error) {
+//     console.log(error);
+//     return res.status(400).json({ message: `Error occured ${error}` });
+//   }
+// };
