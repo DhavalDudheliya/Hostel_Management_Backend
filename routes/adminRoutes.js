@@ -46,6 +46,7 @@ const {
   getBlock,
   deleteBlock,
   userProfilePhotoUpdate,
+  updateStudentProfile,
 } = require("../controllers/adminControllers");
 const { protectUser } = require("../middlewares/userProtect");
 
@@ -114,6 +115,12 @@ router.put(
   (req, res, next) => protectUser(req, res, next),
   upload.single("profilePhoto"),
   userProfilePhotoUpdate
+);
+
+router.put(
+  "/updateStudentProfile",
+  (req, res, next) => protectUser(req, res, next, "Admin"),
+  updateStudentProfile
 );
 
 module.exports = router;

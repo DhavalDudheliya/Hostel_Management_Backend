@@ -145,6 +145,87 @@ const createStudent = async (req, res) => {
   }
 };
 
+const updateStudentProfile = async (req, res) => {
+  try {
+    const {
+      rollNumber,
+      firstName,
+      lastName,
+      dateOfBirth,
+      cast,
+      bloodGroup,
+      permenantDisease,
+      mobileNumber,
+      whatsappNumber,
+      email,
+      fatherFirstName,
+      fatherEmail,
+      fatherMiddlename,
+      work,
+      fatherPhoneNo,
+      fatherWhatsappNo,
+      street,
+      taluka,
+      village,
+      postalCode,
+      university,
+      course,
+      branch,
+      lastExam,
+      lastExamPercentage,
+      lastSchoolName,
+    } = req.body;
+
+    const student = await Student.findOne({ rollNumber: rollNumber });
+
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    student.set({
+      firstName,
+      lastName,
+      dateOfBirth,
+      cast,
+      bloodGroup,
+      permenantDisease,
+      mobileNumber,
+      whatsappNumber,
+      email,
+      fatherFirstName,
+      fatherEmail,
+      fatherMiddlename,
+      work,
+      fatherPhoneNo,
+      fatherWhatsappNo,
+      street,
+      taluka,
+      village,
+      postalCode,
+      university,
+      course,
+      branch,
+      lastExam,
+      lastExamPercentage,
+      lastSchoolName,
+    });
+    await student.save();
+
+    const UpdatedStudent = await Student.findOne({
+      rollNumber: rollNumber,
+    }).populate(["leaves", "fees"]);
+
+    if (UpdatedStudent) {
+      res.status(200).json({
+        message: "Student profile updated successfully",
+        UpdatedStudent,
+      });
+    }
+  } catch (error) {
+    res.status(400).json({ error: "Internal Server Error" });
+  }
+};
+
 const getActiveSeries = async (req, res) => {
   try {
     const rollNoDoc = await RollNo.find();
@@ -202,14 +283,14 @@ const getSearchSuggestionStudent = async (req, res) => {
       const numericRollNumbers = matchingRollNumbers.map(Number);
       students = await Student.find({
         rollNumber: { $in: numericRollNumbers },
-      });
+      }).populate("leaves");
     } else {
       students = await Student.find({
         $or: [
           { firstName: { $regex: new RegExp(query), $options: "i" } },
           { lastName: { $regex: new RegExp(query), $options: "i" } },
         ],
-      });
+      }).populate(["leaves", "fees"]);
     }
 
     // console.log(students);
@@ -433,6 +514,7 @@ module.exports = {
   getBlock,
   deleteBlock,
   userProfilePhotoUpdate,
+  updateStudentProfile,
 };
 
 // const allocateRollNo = async (req, res) => {
