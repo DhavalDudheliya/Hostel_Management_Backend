@@ -1,11 +1,16 @@
 const bcrypt = require("bcrypt");
 const User = require("../models/userModel");
 const Student = require("../models/studentProfile");
+const FeeSchema = require("../models/feesModel.js");
+const FormerStudent = require("../models/formerStudent");
 const RollNo = require("../models/rollNoModel");
+const Leaves = require("../models/leaveModel");
+const Report = require("../models/reportModel");
 const Blocks = require("../models/blocksModel");
 const fs = require("fs");
 const path = require("path");
 const multer = require("multer");
+const moment = require("moment");
 
 const storage = multer.memoryStorage(); // Store files in memory (you can adjust this based on your requirements)
 const upload = multer({ storage: storage });
@@ -78,14 +83,15 @@ const createStudent = async (req, res) => {
       return res.status(409).json({ message: "User already exists" });
     }
 
-    const password = () => {
-      const min = 100000; // Minimum 6-digit number
-      const max = 999999; // Maximum 6-digit number
-      return Math.floor(Math.random() * (max - min + 1)) + min;
-    };
+    // const password = () => {
+    //   const min = 100000; // Minimum 6-digit number
+    //   const max = 999999; // Maximum 6-digit number
+    //   return Math.floor(Math.random() * (max - min + 1)) + min;
+    // };
+    const password = "123456";
 
-    const plainPassword = password().toString(); // Convert the number to a string
-    const hashedPassword = bcrypt.hashSync(plainPassword, salt);
+    // const plainPassword = password().toString(); // Convert the number to a string
+    const hashedPassword = bcrypt.hashSync(password, salt);
 
     const studentDoc = await Student.create({
       rollNumber,
@@ -246,21 +252,32 @@ const generateRollNumber = async (req, res) => {
     }
 
     const [start, end] = range.split("-").map(Number);
+
+    // Find all existing roll numbers within the specified range
     const existingNumbers = await Student.find({
       rollNumber: { $gte: start, $lte: end },
     }).distinct("rollNumber");
 
+    // const existingNumbers = [101, 102, 103, 104, 105, 106, 110];
+
     const existingNumberSet = new Set(existingNumbers);
 
-    let randomNumber;
-    do {
-      randomNumber = Math.floor(Math.random() * (end - start + 1)) + start;
-    } while (existingNumberSet.has(randomNumber));
+    // Find the smallest available roll number within the range
+    let smallestAvailableNumber = start;
+    while (existingNumberSet.has(smallestAvailableNumber)) {
+      smallestAvailableNumber++;
+      if (smallestAvailableNumber > end) {
+        // If no available roll number is found within the range
+        return res.status(400).json({
+          error: "No available roll numbers within the specified range",
+        });
+      }
+    }
 
-    res.json({ randomNumber });
+    res.json({ rollNumber: smallestAvailableNumber });
   } catch (error) {
     console.log("Error generating roll number:", error);
-    res.status(400).json({ error: "Internal Server Error" });
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };
 
@@ -283,7 +300,7 @@ const getSearchSuggestionStudent = async (req, res) => {
       const numericRollNumbers = matchingRollNumbers.map(Number);
       students = await Student.find({
         rollNumber: { $in: numericRollNumbers },
-      }).populate("leaves");
+      }).populate(["leaves", "fees"]);
     } else {
       students = await Student.find({
         $or: [
@@ -502,6 +519,101 @@ const userProfilePhotoUpdate = async (req, res) => {
   }
 };
 
+const applyNOC = async (req, res) => {
+  try {
+    const { studentId, damagedProperties, propertyFine, remark, date } =
+      req.body;
+
+    const student = await Student.findOne({ _id: studentId });
+
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    const formerStudentSchema = await FormerStudent.create({
+      firstName: student.firstName,
+      lastName: student.lastName,
+      dateOfBirth: student.dateOfBirth,
+      mobileNumber: student.mobileNumber,
+      whatsappNumber: student.whatsappNumber,
+      email: student.email,
+      damagedProperties: damagedProperties,
+      propertyFine: propertyFine,
+      remark: remark,
+      date: date,
+      startYear: moment(student.admissionDate).format("YYYY"),
+      endYear: moment(Date.now()).format("YYYY"),
+    });
+
+    if (formerStudentSchema) {
+      // delete user
+      await User.findOneAndDelete({ email: student.email });
+
+      const fees = await FeeSchema.find({ student: student._id });
+
+      // Check the status of each fee
+      const pendingFees = fees.filter((fee) => fee.paymentStatus !== "Paid");
+      const paidFees = fees.filter((fee) => fee.paymentStatus === "Paid");
+
+      // Now you can decide whether to proceed with deletion based on the status of fees
+      if (pendingFees.length === 0 && paidFees.length === 0) {
+        console.log("No fees found for the student.");
+      } else if (pendingFees.length > 0) {
+        res.status(409).json({ message: "There are pending fees of student" });
+      } else {
+        // Perform deletion here
+        await FeeSchema.deleteMany({ student: studentId });
+        console.log(
+          "Fees associated with student ID",
+          studentId,
+          "deleted successfully."
+        );
+      }
+
+      // remove student from room
+      // Find the block by ID
+      const block = await Blocks.findById(student.blockId);
+
+      if (block) {
+        // Find the index of the room with the specified room number
+        const roomIndex = block.rooms.findIndex(
+          (room) => room.number === student.roomNumber
+        );
+
+        if (roomIndex !== -1) {
+          // Remove the student ID from the allocatedStudents array of the room
+          block.rooms[roomIndex].allocatedStudents.pull(student._id);
+
+          // Save the updated block
+          await block.save();
+
+          console.log(`Student removed from room ${student.roomNumber}`);
+        } else {
+          console.log(`Room not found in block `);
+        }
+      } else {
+        console.log(`Block not found.`);
+      }
+
+      // Now delete all Leaves entry
+      await Leaves.deleteMany({ student: student._id });
+      console.log("delete leaves");
+
+      //Delete all reports
+      await Report.deleteMany({ author: student._id });
+      console.log("delete reports");
+
+      // Finally delete student
+      await student.deleteOne({ _id: studentId });
+
+      return res.status(200).json({ message: "NOC applied successfully" });
+    }
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json({ message: `Error occured ${error}` });
+  }
+};
+
 module.exports = {
   getAllStudents,
   getActiveSeries,
@@ -515,6 +627,7 @@ module.exports = {
   deleteBlock,
   userProfilePhotoUpdate,
   updateStudentProfile,
+  applyNOC,
 };
 
 // const allocateRollNo = async (req, res) => {

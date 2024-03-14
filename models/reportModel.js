@@ -13,7 +13,7 @@ const ReportSchema = new mongoose.Schema(
     author: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
-      ref: "User",
+      ref: "Student",
     },
     photo: {
       type: String,
@@ -21,6 +21,10 @@ const ReportSchema = new mongoose.Schema(
     receiver: {
       type: String,
       required: true,
+    },
+    isReaded: {
+      type: Boolean,
+      default: false,
     },
   },
   { timestamps: true, versionKey: false }

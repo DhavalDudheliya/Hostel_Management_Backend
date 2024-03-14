@@ -47,6 +47,7 @@ const {
   deleteBlock,
   userProfilePhotoUpdate,
   updateStudentProfile,
+  applyNOC,
 } = require("../controllers/adminControllers");
 const { protectUser } = require("../middlewares/userProtect");
 
@@ -121,6 +122,12 @@ router.put(
   "/updateStudentProfile",
   (req, res, next) => protectUser(req, res, next, "Admin"),
   updateStudentProfile
+);
+
+router.post(
+  "/applyNOC",
+  (req, res, next) => protectUser(req, res, next, "Admin"),
+  applyNOC
 );
 
 module.exports = router;

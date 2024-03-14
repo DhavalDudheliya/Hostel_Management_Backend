@@ -1,6 +1,8 @@
 const Report = require("../models/reportModel");
 const fs = require("fs");
 const path = require("path");
+const User = require("../models/userModel");
+const Student = require("../models/studentProfile");
 
 /*ADD REPORT */
 const addReport = async (req, res) => {
@@ -13,21 +15,23 @@ const addReport = async (req, res) => {
       reportPhoto = req.file.filename;
     }
 
-    const reportExists = await Report.findOne({ title });
+    console.log(req.user);
 
-    if (reportExists) {
-      return res.status(409).json({ message: "Report already exists" });
-    }
+    const student = await Student.findOne({ email: req.user.email });
 
     const reportDoc = await Report.create({
       title,
       description,
-      author: req.user._id,
+      author: student._id,
       photo: reportPhoto,
       receiver,
     });
 
-    return res.status(200).json(reportDoc);
+    if (reportDoc) {
+      return res
+        .status(200)
+        .json({ message: "Report edded successfully", reportDoc });
+    }
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: `Error occured ${error}` });
@@ -37,7 +41,8 @@ const addReport = async (req, res) => {
 /* STUDENT CAN GET OWN REPORT */
 const getReport = async (req, res) => {
   try {
-    const reportDoc = await Report.find({ author: req.user._id });
+    const student = await Student.findOne({ email: req.user.email });
+    const reportDoc = await Report.find({ author: student._id });
     if (reportDoc) {
       return res.status(200).json(reportDoc);
     }
@@ -50,7 +55,10 @@ const getReport = async (req, res) => {
 /* MANAGER AND ACCOUNTANT CAN SEE STUDENT'S REPORT */
 const getReports = async (req, res) => {
   try {
-    const reports = await Report.find({ receiver: req.user.role }).populate("author");
+    // console.log(req.user);
+    const reports = await Report.find({ receiver: req.user.role }).populate(
+      "author"
+    );
     return res.status(200).json(reports);
   } catch (error) {
     console.log(error);
@@ -83,7 +91,6 @@ const deleteReport = async (req, res) => {
 
     await Report.deleteOne({ _id: id });
     return res.status(200).json({ message: "Report deleted" });
-
   } catch (error) {
     console.log(error);
     return res.json({ message: `Error occured ${error}` });
