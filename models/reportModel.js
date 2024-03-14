@@ -22,7 +22,7 @@ const ReportSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    isReaded: {
+    isMarkedRead: {
       type: Boolean,
       default: false,
     },

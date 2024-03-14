@@ -14,9 +14,6 @@ const addReport = async (req, res) => {
     if (req.file) {
       reportPhoto = req.file.filename;
     }
-
-    console.log(req.user);
-
     const student = await Student.findOne({ email: req.user.email });
 
     const reportDoc = await Report.create({
@@ -66,6 +63,28 @@ const getReports = async (req, res) => {
   }
 };
 
+const markedAsReadReport = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const reportDoc = await Report.findById(id);
+    if (!reportDoc) {
+      return res.status(404).json({ message: "Report not found" });
+    }
+
+    if (reportDoc.receiver !== req.user.role) {
+      return res.status(401).json({ message: "Authorization failed" });
+    }
+
+    reportDoc.isMarkedRead = true;
+    reportDoc.save();
+
+    return res.status(200).json({ message: "Report marked as read" });
+  } catch (error) {
+    console.log(error);
+    return res.json({ message: `Error occured ${error}` });
+  }
+};
+
 /* MANAGER AND ACCOUNTANT CAN MARK AS READ STUDENT'S REPORT */
 const deleteReport = async (req, res) => {
   try {
@@ -102,4 +121,5 @@ module.exports = {
   getReport,
   getReports,
   deleteReport,
+  markedAsReadReport
 };

@@ -12,6 +12,7 @@ const {
   getReport,
   getReports,
   deleteReport,
+  markedAsReadReport,
 } = require("../controllers/reportController");
 const { protectUser } = require("../middlewares/userProtect");
 
@@ -64,6 +65,12 @@ router.delete(
   "/delete-report/:id",
   (req, res, next) => protectUser(req, res, next, "Both"),
   deleteReport
+);
+
+router.put(
+  "/markedAsReadReport/:id",
+  (req, res, next) => protectUser(req, res, next, "Both"),
+  markedAsReadReport
 );
 
 module.exports = router;
