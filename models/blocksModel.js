@@ -6,6 +6,18 @@ const BlocksSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    blockCapacity: {
+      type: Number,
+      required: true,
+    },
+    vacancy: {
+      type: Number,
+      required: true,
+    },
+    filled: {
+      type: Number,
+      default: 0,
+    },
     rooms: [
       {
         number: {
@@ -17,7 +29,7 @@ const BlocksSchema = new mongoose.Schema(
         allocatedStudents: [
           {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Student", 
+            ref: "Student",
           },
         ],
       },

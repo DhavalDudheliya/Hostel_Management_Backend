@@ -327,7 +327,12 @@ const allocateBlock = async (req, res) => {
       await isAllocated.save();
       return res.status(409).json(isAllocated);
     } else {
-      const blockDoc = await Blocks.create({ name: name });
+      const blockCapacity = (end - start + 1) * capacity;
+      const blockDoc = await Blocks.create({
+        name: name,
+        blockCapacity: blockCapacity,
+        vacancy: blockCapacity,
+      });
       blockDoc.rooms = [];
       for (let i = start; i <= end; i++) {
         const room = {
@@ -337,7 +342,10 @@ const allocateBlock = async (req, res) => {
         blockDoc.rooms.push(room);
       }
       await blockDoc.save();
-      return res.status(200).json(blockDoc);
+      const UpdatedBlocks = await Blocks.find({});
+      return res
+        .status(200)
+        .json({ message: "Block added sucessfully", UpdatedBlocks });
     }
   } catch (error) {
     console.log(error);
@@ -386,6 +394,8 @@ const allocateStudent = async (req, res) => {
 
       if (currentBlock) {
         // Remove the student from the current block's allocatedStudents array
+        currentBlock.filled = block.filled - 1;
+        currentBlock.vacancy = block.vacancy + 1;
         currentBlock.rooms.forEach((room) => {
           room.allocatedStudents.pull(studentId);
         });
@@ -407,6 +417,9 @@ const allocateStudent = async (req, res) => {
     student.blockId = block._id;
     student.roomNumber = roomNumber;
 
+    block.filled = block.filled + 1;
+    block.vacancy = block.vacancy - 1;
+
     // Save the changes
     await block.save();
     await student.save();
@@ -418,8 +431,9 @@ const allocateStudent = async (req, res) => {
     });
 
     const roomInfo = blockDoc.rooms.find((room) => room.number === roomNumber);
+    const UpdatedBlocks = await Blocks.find({});
 
-    return res.status(200).json({ roomInfo });
+    return res.status(200).json({ roomInfo, UpdatedBlocks });
   } catch (error) {
     console.log(error);
     return res.status(400).json({ message: `Error occurred: ${error}` });
@@ -472,7 +486,11 @@ const deleteBlock = async (req, res) => {
     // Delete the block
     await Blocks.findByIdAndDelete(id);
 
-    return res.json({ message: "Block deleted successfully" });
+    const UpdatedBlocks = await Blocks.find({});
+
+    return res
+      .status(200)
+      .json({ message: "Block deleted successfully", UpdatedBlocks });
   } catch (error) {
     console.log(error);
     return res.status(400).json({ message: `Error occurred: ${error}` });
