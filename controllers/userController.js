@@ -775,7 +775,7 @@ const forgotPassword = async (req, res) => {
                                   >
                                     <a
                                       target="_blank"
-                                      href="https://viewstripo.email"
+                                      href="https://apcnadiad.netlify.app"
                                       style="
                                         -webkit-text-size-adjust: none;
                                         -ms-text-size-adjust: none;
@@ -883,7 +883,7 @@ const forgotPassword = async (req, res) => {
                                   >
                                     <a
                                       target="_blank"
-                                      href="https://viewstripo.email"
+                                      href="https://apcnadiad.netlify.app"
                                       style="
                                         -webkit-text-size-adjust: none;
                                         -ms-text-size-adjust: none;

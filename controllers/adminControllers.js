@@ -11,6 +11,7 @@ const fs = require("fs");
 const path = require("path");
 const multer = require("multer");
 const moment = require("moment");
+const nodemailer = require("nodemailer");
 
 const storage = multer.memoryStorage(); // Store files in memory (you can adjust this based on your requirements)
 const upload = multer({ storage: storage });
@@ -83,15 +84,15 @@ const createStudent = async (req, res) => {
       return res.status(409).json({ message: "User already exists" });
     }
 
-    // const password = () => {
-    //   const min = 100000; // Minimum 6-digit number
-    //   const max = 999999; // Maximum 6-digit number
-    //   return Math.floor(Math.random() * (max - min + 1)) + min;
-    // };
-    const password = "123456";
+    const password = () => {
+      const min = 100000; // Minimum 6-digit number
+      const max = 999999; // Maximum 6-digit number
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    };
+    // const password = "123456";
 
-    // const plainPassword = password().toString(); // Convert the number to a string
-    const hashedPassword = bcrypt.hashSync(password, salt);
+    const plainPassword = password().toString(); // Convert the number to a string
+    const hashedPassword = bcrypt.hashSync(plainPassword, salt);
 
     const studentDoc = await Student.create({
       rollNumber,
@@ -137,10 +138,1114 @@ const createStudent = async (req, res) => {
       profilePhoto,
     });
 
-    console.log(userDoc);
-    console.log(studentDoc);
-
     if (studentDoc) {
+      // Create a nodemailer transporter
+      const transporter = nodemailer.createTransport({
+        // Configure your email provider details here
+        service: "Gmail",
+        auth: {
+          user: process.env.MAIL_SENDER,
+          pass: process.env.MAIL_PASS,
+        },
+      });
+
+      // Send the reset email to the user
+      const mailOptions = {
+        from: process.env.MAIL_SENDER,
+        to: studentDoc.email,
+        subject: "Welcome to APC Nadiad",
+
+        html: `
+        <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+        <html
+          dir="ltr"
+          xmlns="http://www.w3.org/1999/xhtml"
+          xmlns:o="urn:schemas-microsoft-com:office:office"
+          lang="en"
+        >
+          <head>
+            <meta charset="UTF-8" />
+            <meta content="width=device-width, initial-scale=1" name="viewport" />
+            <meta name="x-apple-disable-message-reformatting" />
+            <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+            <meta content="telephone=no" name="format-detection" />
+            <title>New email template 2024-03-15</title>
+            <!--[if (mso 16)
+              ]><style type="text/css">
+                a {
+                  text-decoration: none;
+                }
+              </style><!
+            [endif]-->
+            <!--[if gte mso 9
+              ]><style>
+                sup {
+                  font-size: 100% !important;
+                }
+              </style><!
+            [endif]-->
+            <!--[if gte mso 9
+              ]><xml>
+                <o:OfficeDocumentSettings>
+                  <o:AllowPNG></o:AllowPNG> <o:PixelsPerInch>96</o:PixelsPerInch>
+                </o:OfficeDocumentSettings>
+              </xml>
+            <![endif]-->
+            <!--[if !mso]><!-- -->
+            <link
+              href="https://fonts.googleapis.com/css2?family=Orbitron&display=swap"
+              rel="stylesheet"
+            />
+            <!--<![endif]-->
+            <style type="text/css">
+              .rollover span {
+                font-size: 0px;
+              }
+              u + .body img ~ div div {
+                display: none;
+              }
+              #outlook a {
+                padding: 0;
+              }
+              span.MsoHyperlink,
+              span.MsoHyperlinkFollowed {
+                color: inherit;
+                mso-style-priority: 99;
+              }
+              a.es-button {
+                mso-style-priority: 100 !important;
+                text-decoration: none !important;
+              }
+              a[x-apple-data-detectors] {
+                color: inherit !important;
+                text-decoration: none !important;
+                font-size: inherit !important;
+                font-family: inherit !important;
+                font-weight: inherit !important;
+                line-height: inherit !important;
+              }
+              .es-desk-hidden {
+                display: none;
+                float: left;
+                overflow: hidden;
+                width: 0;
+                max-height: 0;
+                line-height: 0;
+                mso-hide: all;
+              }
+              .es-left {
+                float: left;
+              }
+              .es-right {
+                float: right;
+              }
+              .es-menu td {
+                border: 0;
+              }
+              .es-menu td a img {
+                display: inline !important;
+                vertical-align: middle;
+              }
+              s {
+                text-decoration: line-through;
+              }
+              ul,
+              ol {
+                font-family: arial, "helvetica neue", helvetica, sans-serif;
+                padding: 0px 0px 0px 40px;
+                margin: 15px 0px;
+              }
+              ul li {
+                color: rgb(51, 51, 51);
+              }
+              ol li {
+                color: rgb(51, 51, 51);
+              }
+              li {
+                margin: 0px 0px 15px;
+                font-size: 14px;
+              }
+              .es-menu td a {
+                font-family: arial, "helvetica neue", helvetica, sans-serif;
+                text-decoration: none;
+                display: block;
+              }
+              .es-header {
+                background-color: transparent;
+                background-repeat: repeat;
+                background-position: center top;
+              }
+              .es-header-body {
+                background-color: rgb(255, 255, 255);
+              }
+              .es-header-body p {
+                color: rgb(51, 51, 51);
+                font-size: 14px;
+              }
+              .es-header-body a {
+                color: rgb(38, 198, 218);
+                font-size: 14px;
+              }
+              .es-footer {
+                background-color: transparent;
+                background-repeat: repeat;
+                background-position: center top;
+              }
+              .es-footer-body {
+                background-color: rgb(255, 255, 255);
+              }
+              .es-footer-body p {
+                color: rgb(51, 51, 51);
+                font-size: 14px;
+              }
+              .es-footer-body a {
+                color: rgb(255, 255, 255);
+                font-size: 14px;
+              }
+              .es-infoblock p {
+                font-size: 12px;
+                color: rgb(204, 204, 204);
+              }
+              .es-infoblock a {
+                font-size: 12px;
+                color: rgb(204, 204, 204);
+              }
+              h2 {
+                font-size: 36px;
+                font-style: normal;
+                font-weight: bold;
+                line-height: 120%;
+                color: rgb(16, 5, 77);
+              }
+              h3 {
+                font-size: 28px;
+                font-style: normal;
+                font-weight: bold;
+                line-height: 120%;
+                color: rgb(16, 5, 77);
+              }
+              h4 {
+                font-size: 24px;
+                font-style: normal;
+                font-weight: normal;
+                line-height: 120%;
+                color: rgb(51, 51, 51);
+              }
+              h5 {
+                font-size: 20px;
+                font-style: normal;
+                font-weight: normal;
+                line-height: 120%;
+                color: rgb(51, 51, 51);
+              }
+              .es-header-body h1 a,
+              .es-content-body h1 a,
+              .es-footer-body h1 a {
+                font-size: 44px;
+              }
+              .es-header-body h2 a,
+              .es-content-body h2 a,
+              .es-footer-body h2 a {
+                font-size: 36px;
+              }
+              .es-header-body h3 a,
+              .es-content-body h3 a,
+              .es-footer-body h3 a {
+                font-size: 28px;
+              }
+              .es-header-body h4 a,
+              .es-content-body h4 a,
+              .es-footer-body h4 a {
+                font-size: 24px;
+              }
+              .es-header-body h5 a,
+              .es-content-body h5 a,
+              .es-footer-body h5 a {
+                font-size: 20px;
+              }
+              .es-header-body h6 a,
+              .es-content-body h6 a,
+              .es-footer-body h6 a {
+                font-size: 16px;
+              }
+              a.es-button,
+              button.es-button {
+                padding: 10px 25px 10px 30px;
+                display: inline-block;
+                background: rgb(38, 198, 218);
+                border-radius: 10px 10px 10px 10px;
+                font-size: 20px;
+                font-family: arial, "helvetica neue", helvetica, sans-serif;
+                font-weight: normal;
+                font-style: normal;
+                line-height: 120%;
+                color: rgb(255, 255, 255);
+                text-decoration: none !important;
+                width: auto;
+                text-align: center;
+                letter-spacing: 0;
+                mso-padding-alt: 0;
+                mso-border-alt: 10px solid rgb(38, 198, 218);
+              }
+              .es-button-border {
+                border-style: solid;
+                border-color: rgb(38, 198, 218) rgb(38, 198, 218) rgb(38, 198, 218)
+                  rgb(38, 198, 218);
+                background: rgb(38, 198, 218);
+                border-width: 4px 4px 4px 4px;
+                display: inline-block;
+                border-radius: 10px 10px 10px 10px;
+                width: auto;
+              }
+              .es-button img {
+                display: inline-block;
+                vertical-align: middle;
+              }
+              .es-fw,
+              .es-fw .es-button {
+                display: block;
+              }
+              .es-il,
+              .es-il .es-button {
+                display: inline-block;
+              }
+              .es-text-rtl h1,
+              .es-text-rtl h2,
+              .es-text-rtl h3,
+              .es-text-rtl h4,
+              .es-text-rtl h5,
+              .es-text-rtl h6,
+              .es-text-rtl input,
+              .es-text-rtl label,
+              .es-text-rtl textarea,
+              .es-text-rtl p,
+              .es-text-rtl ol,
+              .es-text-rtl ul,
+              .es-text-rtl .es-menu a,
+              .es-text-rtl .es-table {
+                direction: rtl;
+              }
+              .es-text-ltr h1,
+              .es-text-ltr h2,
+              .es-text-ltr h3,
+              .es-text-ltr h4,
+              .es-text-ltr h5,
+              .es-text-ltr h6,
+              .es-text-ltr input,
+              .es-text-ltr label,
+              .es-text-ltr textarea,
+              .es-text-ltr p,
+              .es-text-ltr ol,
+              .es-text-ltr ul,
+              .es-text-ltr .es-menu a,
+              .es-text-ltr .es-table {
+                direction: ltr;
+              }
+              .es-text-rtl ol,
+              .es-text-rtl ul {
+                padding: 0px 40px 0px 0px;
+              }
+              .es-text-ltr ul,
+              .es-text-ltr ol {
+                padding: 0px 0px 0px 40px;
+              }
+              .es-p-default {
+                padding-top: 20px;
+                padding-right: 20px;
+                padding-bottom: 0px;
+                padding-left: 20px;
+              }
+              @media only screen and (max-width: 600px) {
+                .es-m-p0r {
+                  padding-right: 0px !important;
+                }
+                .es-m-p20b {
+                  padding-bottom: 20px !important;
+                }
+                *[class="gmail-fix"] {
+                  display: none !important;
+                }
+                p,
+                a {
+                  line-height: 150% !important;
+                }
+                h1,
+                h1 a {
+                  line-height: 120% !important;
+                }
+                h2,
+                h2 a {
+                  line-height: 120% !important;
+                }
+                h3,
+                h3 a {
+                  line-height: 120% !important;
+                }
+                h4,
+                h4 a {
+                  line-height: 120% !important;
+                }
+                h5,
+                h5 a {
+                  line-height: 120% !important;
+                }
+                h6,
+                h6 a {
+                  line-height: 120% !important;
+                }
+                h1 {
+                  font-size: 30px !important;
+                  text-align: center;
+                }
+                h2 {
+                  font-size: 24px !important;
+                  text-align: left;
+                }
+                h3 {
+                  font-size: 20px !important;
+                  text-align: left;
+                }
+                h4 {
+                  font-size: 24px !important;
+                  text-align: left;
+                }
+                h5 {
+                  font-size: 20px !important;
+                  text-align: left;
+                }
+                h6 {
+                  font-size: 16px !important;
+                  text-align: left;
+                }
+                .es-header-body h1 a,
+                .es-content-body h1 a,
+                .es-footer-body h1 a {
+                  font-size: 30px !important;
+                }
+                .es-header-body h2 a,
+                .es-content-body h2 a,
+                .es-footer-body h2 a {
+                  font-size: 24px !important;
+                }
+                .es-header-body h3 a,
+                .es-content-body h3 a,
+                .es-footer-body h3 a {
+                  font-size: 20px !important;
+                }
+                .es-header-body h4 a,
+                .es-content-body h4 a,
+                .es-footer-body h4 a {
+                  font-size: 24px !important;
+                }
+                .es-header-body h5 a,
+                .es-content-body h5 a,
+                .es-footer-body h5 a {
+                  font-size: 20px !important;
+                }
+                .es-header-body h6 a,
+                .es-content-body h6 a,
+                .es-footer-body h6 a {
+                  font-size: 16px !important;
+                }
+                .es-menu td a {
+                  font-size: 14px !important;
+                }
+                .es-header-body p,
+                .es-header-body a {
+                  font-size: 14px !important;
+                }
+                .es-content-body p,
+                .es-content-body a {
+                  font-size: 14px !important;
+                }
+                .es-footer-body p,
+                .es-footer-body a {
+                  font-size: 14px !important;
+                }
+                .es-infoblock p,
+                .es-infoblock a {
+                  font-size: 12px !important;
+                }
+                .es-m-txt-c,
+                .es-m-txt-c h1,
+                .es-m-txt-c h2,
+                .es-m-txt-c h3,
+                .es-m-txt-c h4,
+                .es-m-txt-c h5,
+                .es-m-txt-c h6 {
+                  text-align: center !important;
+                }
+                .es-m-txt-r,
+                .es-m-txt-r h1,
+                .es-m-txt-r h2,
+                .es-m-txt-r h3,
+                .es-m-txt-r h4,
+                .es-m-txt-r h5,
+                .es-m-txt-r h6 {
+                  text-align: right !important;
+                }
+                .es-m-txt-j,
+                .es-m-txt-j h1,
+                .es-m-txt-j h2,
+                .es-m-txt-j h3,
+                .es-m-txt-j h4,
+                .es-m-txt-j h5,
+                .es-m-txt-j h6 {
+                  text-align: justify !important;
+                }
+                .es-m-txt-l,
+                .es-m-txt-l h1,
+                .es-m-txt-l h2,
+                .es-m-txt-l h3,
+                .es-m-txt-l h4,
+                .es-m-txt-l h5,
+                .es-m-txt-l h6 {
+                  text-align: left !important;
+                }
+                .es-m-txt-r img,
+                .es-m-txt-c img,
+                .es-m-txt-l img {
+                  display: inline !important;
+                }
+                .es-m-txt-r .rollover:hover .rollover-second,
+                .es-m-txt-c .rollover:hover .rollover-second,
+                .es-m-txt-l .rollover:hover .rollover-second {
+                  display: inline !important;
+                }
+                .es-m-txt-r .rollover span,
+                .es-m-txt-c .rollover span,
+                .es-m-txt-l .rollover span {
+                  line-height: 0 !important;
+                  font-size: 0 !important;
+                }
+                .es-spacer {
+                  display: inline-table;
+                }
+                a.es-button,
+                button.es-button {
+                  font-size: 18px !important;
+                  line-height: 120% !important;
+                }
+                a.es-button,
+                button.es-button,
+                .es-button-border {
+                  display: inline-block !important;
+                }
+                .es-m-fw,
+                .es-m-fw.es-fw,
+                .es-m-fw .es-button {
+                  display: block !important;
+                }
+                .es-m-il,
+                .es-m-il .es-button,
+                .es-social,
+                .es-social td,
+                .es-menu {
+                  display: inline-block !important;
+                }
+                .es-adaptive table,
+                .es-left,
+                .es-right {
+                  width: 100% !important;
+                }
+                .es-content table,
+                .es-header table,
+                .es-footer table,
+                .es-content,
+                .es-footer,
+                .es-header {
+                  width: 100% !important;
+                  max-width: 600px !important;
+                }
+                .adapt-img {
+                  width: 100% !important;
+                  height: auto !important;
+                }
+                .es-mobile-hidden,
+                .es-hidden {
+                  display: none !important;
+                }
+                .es-desk-hidden {
+                  width: auto !important;
+                  overflow: visible !important;
+                  float: none !important;
+                  max-height: inherit !important;
+                  line-height: inherit !important;
+                }
+                tr.es-desk-hidden {
+                  display: table-row !important;
+                }
+                table.es-desk-hidden {
+                  display: table !important;
+                }
+                td.es-desk-menu-hidden {
+                  display: table-cell !important;
+                }
+                .es-menu td {
+                  width: 1% !important;
+                }
+                table.es-table-not-adapt,
+                .esd-block-html table {
+                  width: auto !important;
+                }
+                .es-social td {
+                  padding-bottom: 10px;
+                }
+                .h-auto {
+                  height: auto !important;
+                }
+              }
+              @media screen and (max-width: 384px) {
+                .mail-message-content {
+                  width: 414px !important;
+                }
+              }
+            </style>
+          </head>
+          <body class="body" style="width: 100%; height: 100%; padding: 0; margin: 0">
+            <div
+              dir="ltr"
+              class="es-wrapper-color"
+              lang="en"
+              style="background-color: #07023c"
+            >
+              <!--[if gte mso 9
+                ]><v:background xmlns:v="urn:schemas-microsoft-com:vml" fill="t">
+                  <v:fill type="tile" color="#07023c"></v:fill> </v:background
+              ><![endif]-->
+              <table
+                class="es-wrapper"
+                width="100%"
+                cellspacing="0"
+                cellpadding="0"
+                role="none"
+                style="
+                  mso-table-lspace: 0pt;
+                  mso-table-rspace: 0pt;
+                  border-collapse: collapse;
+                  border-spacing: 0px;
+                  padding: 0;
+                  margin: 0;
+                  width: 100%;
+                  height: 100%;
+                  background-repeat: repeat;
+                  background-position: center top;
+                  background-color: #07023c;
+                "
+              >
+                <tr>
+                  <td valign="top" style="padding: 0; margin: 0">
+                    <table
+                      class="es-content"
+                      cellspacing="0"
+                      cellpadding="0"
+                      align="center"
+                      role="none"
+                      style="
+                        mso-table-lspace: 0pt;
+                        mso-table-rspace: 0pt;
+                        border-collapse: collapse;
+                        border-spacing: 0px;
+                        width: 100%;
+                        table-layout: fixed !important;
+                      "
+                    >
+                      <tr>
+                        <td align="center" style="padding: 0; margin: 0">
+                          <table
+                            class="es-content-body"
+                            style="
+                              mso-table-lspace: 0pt;
+                              mso-table-rspace: 0pt;
+                              border-collapse: collapse;
+                              border-spacing: 0px;
+                              background-color: #ffffff;
+                              background-repeat: no-repeat;
+                              width: 600px;
+                              background-image: url(https://eezhzut.stripocdn.email/content/guids/CABINET_0e8fbb6adcc56c06fbd3358455fdeb41/images/vector_0Ia.png);
+                              background-position: center center;
+                            "
+                            cellspacing="0"
+                            cellpadding="0"
+                            bgcolor="#ffffff"
+                            align="center"
+                            background="https://eezhzut.stripocdn.email/content/guids/CABINET_0e8fbb6adcc56c06fbd3358455fdeb41/images/vector_0Ia.png"
+                            role="none"
+                          >
+                            <tr>
+                              <td
+                                align="left"
+                                style="
+                                  margin: 0;
+                                  padding-top: 20px;
+                                  padding-right: 20px;
+                                  padding-bottom: 10px;
+                                  padding-left: 20px;
+                                "
+                              >
+                                <table
+                                  cellpadding="0"
+                                  cellspacing="0"
+                                  width="100%"
+                                  role="none"
+                                  style="
+                                    mso-table-lspace: 0pt;
+                                    mso-table-rspace: 0pt;
+                                    border-collapse: collapse;
+                                    border-spacing: 0px;
+                                  "
+                                >
+                                  <tr>
+                                    <td
+                                      class="es-m-p0r"
+                                      valign="top"
+                                      align="center"
+                                      style="padding: 0; margin: 0; width: 560px"
+                                    >
+                                      <table
+                                        cellpadding="0"
+                                        cellspacing="0"
+                                        width="100%"
+                                        role="presentation"
+                                        style="
+                                          mso-table-lspace: 0pt;
+                                          mso-table-rspace: 0pt;
+                                          border-collapse: collapse;
+                                          border-spacing: 0px;
+                                        "
+                                      >
+                                        <tr>
+                                          <td
+                                            align="center"
+                                            style="
+                                              padding: 0;
+                                              margin: 0;
+                                              font-size: 0px;
+                                            "
+                                          >
+                                            <a
+                                              target="_blank"
+                                              href="https://apcnadiad.netlify.app"
+                                              style="
+                                                mso-line-height-rule: exactly;
+                                                text-decoration: underline;
+                                                color: #26c6da;
+                                                font-size: 14px;
+                                              "
+                                              ><img
+                                                src="https://raw.githubusercontent.com/DhavalDudheliya/Hostel_Management_Frontend/main/src/assets/logo.png"
+                                                alt="Logo"
+                                                style="
+                                                  display: block;
+                                                  font-size: 14px;
+                                                  border: 0;
+                                                  outline: none;
+                                                  text-decoration: none;
+                                                "
+                                                title="Logo"
+                                                height="55"
+                                                width="66"
+                                            /></a>
+                                          </td>
+                                        </tr>
+                                      </table>
+                                    </td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td
+                                align="left"
+                                style="
+                                  margin: 0;
+                                  padding-right: 20px;
+                                  padding-left: 20px;
+                                  padding-top: 30px;
+                                  padding-bottom: 30px;
+                                "
+                              >
+                                <table
+                                  width="100%"
+                                  cellspacing="0"
+                                  cellpadding="0"
+                                  role="none"
+                                  style="
+                                    mso-table-lspace: 0pt;
+                                    mso-table-rspace: 0pt;
+                                    border-collapse: collapse;
+                                    border-spacing: 0px;
+                                  "
+                                >
+                                  <tr>
+                                    <td
+                                      class="es-m-p0r es-m-p20b"
+                                      valign="top"
+                                      align="center"
+                                      style="padding: 0; margin: 0; width: 560px"
+                                    >
+                                      <table
+                                        width="100%"
+                                        cellspacing="0"
+                                        cellpadding="0"
+                                        role="presentation"
+                                        style="
+                                          mso-table-lspace: 0pt;
+                                          mso-table-rspace: 0pt;
+                                          border-collapse: collapse;
+                                          border-spacing: 0px;
+                                        "
+                                      >
+                                        <tr>
+                                          <td
+                                            align="center"
+                                            style="padding: 0; margin: 0"
+                                          >
+                                            <h1
+                                              style="
+                                                margin: 0;
+                                                font-family: Orbitron, sans-serif;
+                                                mso-line-height-rule: exactly;
+                                                letter-spacing: 0;
+                                                font-size: 44px;
+                                                font-style: normal;
+                                                font-weight: bold;
+                                                line-height: 53px;
+                                                color: #10054d;
+                                              "
+                                            >
+                                              Welcome to&nbsp;
+                                            </h1>
+                                          </td>
+                                        </tr>
+                                        <tr>
+                                          <td
+                                            align="center"
+                                            style="padding: 0; margin: 0"
+                                          >
+                                            <h1
+                                              style="
+                                                margin: 0;
+                                                font-family: Orbitron, sans-serif;
+                                                mso-line-height-rule: exactly;
+                                                letter-spacing: 0;
+                                                font-size: 44px;
+                                                font-style: normal;
+                                                font-weight: bold;
+                                                line-height: 53px;
+                                                color: #10054d;
+                                              "
+                                            >
+                                              APC NADIAD
+                                            </h1>
+                                          </td>
+                                        </tr>
+                                        <tr>
+                                          <td
+                                            align="center"
+                                            style="
+                                              margin: 0;
+                                              padding-bottom: 10px;
+                                              padding-top: 10px;
+                                              padding-right: 30px;
+                                              padding-left: 25px;
+                                            "
+                                          >
+                                            <p
+                                              align="left"
+                                              style="
+                                                margin: 0;
+                                                mso-line-height-rule: exactly;
+                                                font-family: arial, 'helvetica neue',
+                                                  helvetica, sans-serif;
+                                                line-height: 21px;
+                                                letter-spacing: 0;
+                                                color: #333333;
+                                                font-size: 14px;
+                                              "
+                                            >
+                                              ​
+                                            </p>
+                                            <p
+                                              align="left"
+                                              style="
+                                                margin: 0;
+                                                mso-line-height-rule: exactly;
+                                                font-family: arial, 'helvetica neue',
+                                                  helvetica, sans-serif;
+                                                line-height: 21px;
+                                                letter-spacing: 0;
+                                                color: #333333;
+                                                font-size: 14px;
+                                              "
+                                            >
+                                              <strong
+                                                >Dear ${studentDoc.firstName}
+                                                ${studentDoc.lastName},</strong
+                                              >
+                                            </p>
+                                          </td>
+                                        </tr>
+                                        <tr>
+                                          <td
+                                            align="center"
+                                            style="
+                                              margin: 0;
+                                              padding-bottom: 10px;
+                                              padding-top: 10px;
+                                              padding-left: 25px;
+                                              padding-right: 25px;
+                                            "
+                                          >
+                                            <p
+                                              align="left"
+                                              style="
+                                                margin: 0;
+                                                mso-line-height-rule: exactly;
+                                                font-family: arial, 'helvetica neue',
+                                                  helvetica, sans-serif;
+                                                line-height: 21px;
+                                                letter-spacing: 0;
+                                                color: #333333;
+                                                font-size: 14px;
+                                              "
+                                            >
+                                              We are delighted to inform you that you
+                                              are now a member of APC Nadiad community!
+                                              Welcome!
+                                            </p>
+                                            <p
+                                              align="left"
+                                              style="
+                                                margin: 0;
+                                                mso-line-height-rule: exactly;
+                                                font-family: arial, 'helvetica neue',
+                                                  helvetica, sans-serif;
+                                                line-height: 21px;
+                                                letter-spacing: 0;
+                                                color: #333333;
+                                                font-size: 14px;
+                                              "
+                                            >
+                                              ​
+                                            </p>
+                                            <p
+                                              align="left"
+                                              style="
+                                                margin: 0;
+                                                mso-line-height-rule: exactly;
+                                                font-family: arial, 'helvetica neue',
+                                                  helvetica, sans-serif;
+                                                line-height: 21px;
+                                                letter-spacing: 0;
+                                                color: #333333;
+                                                font-size: 14px;
+                                              "
+                                            >
+                                              Your login details for the hostel web
+                                              portal are as follows:
+                                            </p>
+                                            <h1
+                                              align="left"
+                                              style="
+                                                margin: 0;
+                                                font-family: Orbitron, sans-serif;
+                                                mso-line-height-rule: exactly;
+                                                letter-spacing: 0;
+                                                font-size: 44px;
+                                                font-style: normal;
+                                                font-weight: bold;
+                                                line-height: 53px;
+                                                color: #10054d;
+                                              "
+                                            >
+                                              ​
+                                            </h1>
+                                            <h6
+                                              align="center"
+                                              style="
+                                                margin: 0;
+                                                font-family: Orbitron, sans-serif;
+                                                mso-line-height-rule: exactly;
+                                                letter-spacing: 0;
+                                                font-size: 16px;
+                                                font-style: normal;
+                                                font-weight: normal;
+                                                line-height: 19px;
+                                                color: #333333;
+                                              "
+                                            >
+                                              <strong
+                                                >​Username:
+                                                &nbsp;${studentDoc.email}</strong
+                                              >
+                                            </h6>
+                                            <h6
+                                              align="center"
+                                              style="
+                                                margin: 0;
+                                                font-family: Orbitron, sans-serif;
+                                                mso-line-height-rule: exactly;
+                                                letter-spacing: 0;
+                                                font-size: 16px;
+                                                font-style: normal;
+                                                font-weight: normal;
+                                                line-height: 19px;
+                                                color: #333333;
+                                              "
+                                            >
+                                              <strong
+                                                >Password: &nbsp;${plainPassword}</strong
+                                              >
+                                            </h6>
+                                            <p
+                                              align="center"
+                                              style="
+                                                margin: 0;
+                                                mso-line-height-rule: exactly;
+                                                font-family: arial, 'helvetica neue',
+                                                  helvetica, sans-serif;
+                                                line-height: 21px;
+                                                letter-spacing: 0;
+                                                color: #333333;
+                                                font-size: 14px;
+                                              "
+                                            >
+                                              <strong>​</strong>
+                                            </p>
+                                          </td>
+                                        </tr>
+                                        <tr>
+                                          <td
+                                            align="center"
+                                            style="
+                                              margin: 0;
+                                              padding-bottom: 10px;
+                                              padding-top: 10px;
+                                              padding-left: 25px;
+                                              padding-right: 25px;
+                                            "
+                                          >
+                                            <p
+                                              style="
+                                                margin: 0;
+                                                mso-line-height-rule: exactly;
+                                                font-family: arial, 'helvetica neue',
+                                                  helvetica, sans-serif;
+                                                line-height: 21px;
+                                                letter-spacing: 0;
+                                                color: #333333;
+                                                font-size: 14px;
+                                              "
+                                            >
+                                              You can change your password from portal.
+                                            </p>
+                                          </td>
+                                        </tr>
+                                      </table>
+                                    </td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td
+                                align="left"
+                                style="
+                                  margin: 0;
+                                  padding-top: 20px;
+                                  padding-right: 20px;
+                                  padding-bottom: 10px;
+                                  padding-left: 20px;
+                                "
+                              >
+                                <table
+                                  cellpadding="0"
+                                  cellspacing="0"
+                                  width="100%"
+                                  role="none"
+                                  style="
+                                    mso-table-lspace: 0pt;
+                                    mso-table-rspace: 0pt;
+                                    border-collapse: collapse;
+                                    border-spacing: 0px;
+                                  "
+                                >
+                                  <tr>
+                                    <td
+                                      class="es-m-p0r"
+                                      valign="top"
+                                      align="center"
+                                      style="padding: 0; margin: 0; width: 560px"
+                                    >
+                                      <table
+                                        cellpadding="0"
+                                        cellspacing="0"
+                                        width="100%"
+                                        role="presentation"
+                                        style="
+                                          mso-table-lspace: 0pt;
+                                          mso-table-rspace: 0pt;
+                                          border-collapse: collapse;
+                                          border-spacing: 0px;
+                                        "
+                                      >
+                                        <tr>
+                                          <td
+                                            align="center"
+                                            style="
+                                              padding: 0;
+                                              margin: 0;
+                                              font-size: 0px;
+                                            "
+                                          >
+                                            <a
+                                              target="_blank"
+                                              href="https://apcnadiad.netlify.app"
+                                              style="
+                                                mso-line-height-rule: exactly;
+                                                text-decoration: underline;
+                                                color: #26c6da;
+                                                font-size: 14px;
+                                              "
+                                              ><img
+                                                src="https://raw.githubusercontent.com/DhavalDudheliya/Hostel_Management_Frontend/main/src/assets/logo.png"
+                                                alt="Logo"
+                                                style="
+                                                  display: block;
+                                                  font-size: 14px;
+                                                  border: 0;
+                                                  outline: none;
+                                                  text-decoration: none;
+                                                "
+                                                title="Logo"
+                                                height="55"
+                                                width="66"
+                                            /></a>
+                                          </td>
+                                        </tr>
+                                      </table>
+                                    </td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </body>
+        </html>
+        
+
+      `,
+      };
+
+      await transporter.sendMail(mailOptions);
       return res.status(200).json(studentDoc);
     } else {
       return res.status(400).json({ message: "Cannot add Student" });
@@ -373,14 +1478,6 @@ const allocateStudent = async (req, res) => {
     const studentId = studentDoc._id;
     // console.log(studentId);
 
-    // Find the block with the given ID
-    const block = await Blocks.findById(id);
-    // console.log(block);
-
-    if (!block) {
-      return res.status(404).json({ message: "Block not found" });
-    }
-
     // Check if the student is already allocated to another block
     const student = await Student.findById(studentId);
 
@@ -393,14 +1490,20 @@ const allocateStudent = async (req, res) => {
       const currentBlock = await Blocks.findById(student.blockId);
 
       if (currentBlock) {
-        // Remove the student from the current block's allocatedStudents array
-        currentBlock.filled = block.filled - 1;
-        currentBlock.vacancy = block.vacancy + 1;
+        currentBlock.filled = currentBlock.filled - 1;
+        currentBlock.vacancy = currentBlock.vacancy + 1;
         currentBlock.rooms.forEach((room) => {
           room.allocatedStudents.pull(studentId);
         });
         await currentBlock.save();
       }
+    }
+
+    // Find the block with the given ID
+    const block = await Blocks.findById(id);
+
+    if (!block) {
+      return res.status(404).json({ message: "Block not found" });
     }
 
     // Find the room in the block with the given roomNumber
@@ -570,14 +1673,17 @@ const applyNOC = async (req, res) => {
       const fees = await FeeSchema.find({ student: student._id });
 
       // Check the status of each fee
-      const pendingFees = fees.filter((fee) => fee.paymentStatus !== "Paid");
+      const pendingFees = fees.filter((fee) => fee.paymentStatus != "Paid");
       const paidFees = fees.filter((fee) => fee.paymentStatus === "Paid");
 
       // Now you can decide whether to proceed with deletion based on the status of fees
       if (pendingFees.length === 0 && paidFees.length === 0) {
         console.log("No fees found for the student.");
       } else if (pendingFees.length > 0) {
-        res.status(409).json({ message: "There are pending fees of student" });
+        console.log("There are pending fees of student");
+        return res
+          .status(409)
+          .json({ message: "There are pending fees of student" });
       } else {
         // Perform deletion here
         await FeeSchema.deleteMany({ student: studentId });
@@ -602,6 +1708,9 @@ const applyNOC = async (req, res) => {
           // Remove the student ID from the allocatedStudents array of the room
           block.rooms[roomIndex].allocatedStudents.pull(student._id);
 
+          block.filled = block.filled - 1;
+          block.vacancy = block.vacancy + 1;
+
           // Save the updated block
           await block.save();
 
@@ -622,7 +1731,7 @@ const applyNOC = async (req, res) => {
       console.log("delete reports");
 
       // Finally delete student
-      await student.deleteOne({ _id: studentId });
+      await Student.deleteOne({ _id: studentId });
 
       return res.status(200).json({ message: "NOC applied successfully" });
     }
