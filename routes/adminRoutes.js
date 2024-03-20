@@ -48,6 +48,9 @@ const {
   userProfilePhotoUpdate,
   updateStudentProfile,
   applyNOC,
+  getPresentStudentsCountOfFourDays,
+  getCountsForDashboard,
+  getCountOfVacancy,
 } = require("../controllers/adminControllers");
 const { protectUser } = require("../middlewares/userProtect");
 
@@ -128,6 +131,24 @@ router.post(
   "/applyNOC",
   (req, res, next) => protectUser(req, res, next, "Admin"),
   applyNOC
+);
+
+router.get(
+  "/getPresentStudentsCountOfFourDays",
+  // (req, res, next) => protectUser(req, res, next, "Admin"),
+  getPresentStudentsCountOfFourDays
+);
+
+router.get(
+  "/getCountsForDashboard",
+  // (req, res, next) => protectUser(req, res, next, "Admin"),
+  getCountsForDashboard
+);
+
+router.get(
+  "/getCountOfVacancy",
+  // (req, res, next) => protectUser(req, res, next, "Admin"),
+  getCountOfVacancy
 );
 
 module.exports = router;

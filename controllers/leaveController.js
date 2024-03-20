@@ -6,15 +6,18 @@ const applyPersonalLeave = async (req, res) => {
   try {
     const { rollNumber, startDate, endDate, reason } = req.body;
 
+    const FormatedstartDate = moment(startDate, "DD-MM-YYYY").toDate();
+    const FormatedendDate = moment(endDate, "DD-MM-YYYY").toDate();
+
+    console.log(FormatedstartDate);
+    console.log(FormatedendDate);
+
     // Validate inputs (you might need more thorough validation)
     if (!rollNumber || !startDate || !endDate || !reason) {
       return res
         .status(400)
         .json({ message: "Incomplete information for leave application" });
     }
-
-    console.log(startDate);
-    console.log(endDate);
 
     // Check if the student exists
     const student = await Student.findOne({ rollNumber: rollNumber });
@@ -25,8 +28,8 @@ const applyPersonalLeave = async (req, res) => {
     // Create a leave application
     const leaveSchema = new Leave({
       student: student._id,
-      startDate: startDate,
-      endDate: endDate,
+      startDate: FormatedstartDate,
+      endDate: FormatedendDate,
       reason,
       status: "approved",
     });
@@ -101,12 +104,12 @@ async function createLeaveSchema(studentId, startDate, endDate, reason) {
 const findStudentsOnLeave = async (req, res) => {
   try {
     const currentDate = new Date();
-    const formattedCurrentDate = moment(currentDate).format("DDMMYYYY");
+    // const formattedCurrentDate = moment(currentDate).format("DDMMYYYY");
 
     // Find leave applications that overlap with the current date
     const leaveApplications = await Leave.find({
-      startDate: { $lte: formattedCurrentDate }, // Leave starts before or on the current date
-      endDate: { $gte: formattedCurrentDate }, // Leave ends on or after the current date
+      startDate: { $lte: currentDate }, // Leave starts before or on the current date
+      endDate: { $gte: currentDate }, // Leave ends on or after the current date
     }).populate("student");
 
     if (!leaveApplications) {

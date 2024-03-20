@@ -68,15 +68,11 @@ const createStudent = async (req, res) => {
       work,
     } = req.body;
 
-    console.log(req.body);
-
     let profilePhoto;
 
     if (req.file) {
       profilePhoto = req.file.filename;
     }
-
-    console.log(profilePhoto);
 
     const userExists = await Student.findOne({ email });
 
@@ -1276,6 +1272,7 @@ const updateStudentProfile = async (req, res) => {
       fatherPhoneNo,
       fatherWhatsappNo,
       street,
+      district,
       taluka,
       village,
       postalCode,
@@ -1309,10 +1306,13 @@ const updateStudentProfile = async (req, res) => {
       work,
       fatherPhoneNo,
       fatherWhatsappNo,
-      street,
-      taluka,
-      village,
-      postalCode,
+      address: {
+        street,
+        village,
+        taluka,
+        district,
+        postalCode,
+      },
       university,
       course,
       branch,
@@ -1741,6 +1741,149 @@ const applyNOC = async (req, res) => {
   }
 };
 
+// Query the Leave model to find leaves that overlap with the given date range
+async function findStudentsPresentByDateRange(startDate, endDate) {
+  try {
+    // console.log(startDate);
+    // console.log(endDate);
+    startDate = moment(startDate, "DD-MM-YYYY").toDate();
+    endDate = moment(endDate, "DD-MM-YYYY").toDate();
+
+    // console.log(startDate);
+    // console.log(endDate);
+
+    const leaves = await Leaves.find({
+      $or: [
+        {
+          $and: [
+            { startDate: { $lte: endDate } }, // Leave starts before or on the end date
+            { endDate: { $gte: startDate } }, // Leave ends after or on the start date
+          ],
+        },
+      ],
+    });
+
+    // console.log(leaves);
+
+    // Extract unique student IDs from leaves
+    const studentIdsOnLeave = leaves.map((leave) => leave.student.toString());
+
+    // Query the Student model to find the count of students not on leave
+    const studentsPresentCount = await Student.countDocuments({
+      _id: { $nin: studentIdsOnLeave },
+    });
+
+    return studentsPresentCount;
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json({ message: `Error occured ${error}` });
+  }
+}
+
+// Usage example
+const getPresentStudentsCountOfFourDays = async (req, res) => {
+  try {
+    // Define the date ranges for yesterday, today, and the next two days
+    const yesterday = moment().subtract(1, "days").format("DD-MM-YYYY");
+    const today = moment().format("DD-MM-YYYY");
+    const tomorrow = moment().add(1, "days").format("DD-MM-YYYY");
+    const dayAfterTomorrow = moment().add(2, "days").format("DD-MM-YYYY");
+
+    const studentsCountYesterday = await findStudentsPresentByDateRange(
+      yesterday,
+      yesterday
+    );
+    const studentsCountToday = await findStudentsPresentByDateRange(
+      today,
+      today
+    );
+    const studentsCountTomorrow = await findStudentsPresentByDateRange(
+      tomorrow,
+      tomorrow
+    );
+    const studentsCountDayAfterTomorrow = await findStudentsPresentByDateRange(
+      dayAfterTomorrow,
+      dayAfterTomorrow
+    );
+
+    // console.log("Students present yesterday:", studentsCountYesterday);
+    // console.log("Students present today:", studentsCountToday);
+    // console.log("Students present tomorrow:", studentsCountTomorrow);
+    // console.log(
+    //   "Students present day after tomorrow:",
+    //   studentsCountDayAfterTomorrow
+    // );
+
+    const totalStudents = await Student.countDocuments({});
+
+    // console.log(totalStudents);
+
+    return res.status(200).json({
+      studentsCountYesterday,
+      studentsCountToday,
+      studentsCountTomorrow,
+      studentsCountDayAfterTomorrow,
+      totalStudents,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json({ message: `Error occured ${error}` });
+  }
+};
+
+const getCountsForDashboard = async (req, res) => {
+  try {
+    const totalStudents = await Student.countDocuments({});
+    const pendingFees = await FeeSchema.countDocuments({
+      paymentStatus: "Pending",
+    });
+    const partialFees = await FeeSchema.countDocuments({
+      paymentStatus: "Partial",
+    });
+
+    const today = new Date();
+
+    const students = await Student.aggregate([
+      {
+        $match: {
+          $expr: {
+            $eq: [{ $dayOfMonth: "$dateOfBirth" }, { $dayOfMonth: new Date() }],
+          },
+        },
+      },
+    ]);
+
+    return res
+      .status(200)
+      .json({ totalStudents, pendingFees, partialFees, students });
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json({ message: `Error occured ${error}` });
+  }
+};
+
+getCountOfVacancy = async (req, res) => {
+  try {
+    let totalAvailability = 0;
+    let totalVacancy = 0;
+    let totalFilled = 0;
+    const blocks = await Blocks.find({});
+    blocks.map(
+      (block) => (totalAvailability = totalAvailability + block.blockCapacity)
+    );
+    blocks.map((block) => (totalVacancy = totalVacancy + block.vacancy));
+    blocks.map((block) => (totalFilled = totalFilled + block.filled));
+    const blocksWithFilter = await Blocks.find({}, { filled: 1, vacancy: 1 });
+
+    return res
+      .status(200)
+      .json({ totalAvailability, totalVacancy, totalFilled, blocksWithFilter });
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json({ message: `Error occured ${error}` });
+  }
+};
+
 module.exports = {
   getAllStudents,
   getActiveSeries,
@@ -1755,6 +1898,9 @@ module.exports = {
   userProfilePhotoUpdate,
   updateStudentProfile,
   applyNOC,
+  getPresentStudentsCountOfFourDays,
+  getCountsForDashboard,
+  getCountOfVacancy,
 };
 
 // const allocateRollNo = async (req, res) => {
