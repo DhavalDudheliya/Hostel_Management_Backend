@@ -125,9 +125,52 @@ const findStudentsOnLeave = async (req, res) => {
       .json({ message: "Error finding students on leave:", error });
   }
 };
+const cancelLeave = async (req, res) => {
+  try {
+    const { studentId, leaveId } = req.body;
+
+    const leaveObject = await Leave.findById(leaveId);
+
+    if (!leaveObject) {
+      return res.status(404).json({ message: "Leave not found" });
+    }
+
+    const deletedFeeStudent = await Student.findByIdAndUpdate(
+      studentId,
+      {
+        $pull: { leaves: leaveId },
+      },
+      { new: true }
+    );
+
+    if (!deletedFeeStudent) {
+      // Handle the case where the student with the provided ID is not found
+      console.log("Student not found");
+      return null;
+    }
+
+    const result = await Leave.deleteOne({ _id: leaveId });
+
+    const updatedStudent = await Student.findById(studentId).populate([
+      "leaves",
+      "fees",
+    ]);
+
+    if (result.deletedCount === 1) {
+      res
+        .status(200)
+        .json({ message: "Leave canceld successfully", updatedStudent });
+    }
+  } catch (error) {
+    return res
+      .status(400)
+      .json({ message: "Error in canceling leave:", error });
+  }
+};
 
 module.exports = {
   applyPersonalLeave,
   applyBulkLeave,
   findStudentsOnLeave,
+  cancelLeave,
 };

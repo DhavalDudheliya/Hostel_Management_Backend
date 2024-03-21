@@ -6,6 +6,7 @@ const {
   applyPersonalLeave,
   applyBulkLeave,
   findStudentsOnLeave,
+  cancelLeave,
 } = require("../controllers/leaveController");
 const { protectUser } = require("../middlewares/userProtect");
 
@@ -23,6 +24,11 @@ router.get(
   "/findStudentsOnLeave",
   //   (req, res, next) => protectUser(req, res, next, "Admin"),
   findStudentsOnLeave
+);
+router.post(
+  "/cancelLeave",
+  //   (req, res, next) => protectUser(req, res, next, "Admin"),
+  cancelLeave
 );
 
 module.exports = router;
