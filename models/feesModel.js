@@ -9,6 +9,20 @@ const paidFeeSchema = new mongoose.Schema({
     type: Date,
     required: true,
   },
+  method: {
+    type: String,
+    enum: ["Online", "Cash"],
+    required: "true",
+  },
+  razorpay_payment_id: {
+    type: String,
+  },
+  razorpay_order_id: {
+    type: String,
+  },
+  razorpay_signature: {
+    type: String,
+  },
 });
 
 const feeSchema = new mongoose.Schema(

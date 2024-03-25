@@ -69,6 +69,7 @@ app.use("/report", reportRouter);
 app.use("/accountant", accountantRouter);
 app.use("/leave", leaveRouter);
 app.use("/api", paymentRouter);
+app.use("/student", studentRouter);
 
 app.get("/api/getkey", (req, res) => {
   res.status(200).json({ key: process.env.ROZORPAY_API_KEY });

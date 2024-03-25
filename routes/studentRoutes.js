@@ -6,8 +6,13 @@ const path = require("path");
 /* ROUTER */
 const router = express.Router();
 
-/* ALL FUNCTIONS */
+const { getStudentProfile } = require("../controllers/studentController");
+const { protectUser } = require("../middlewares/userProtect");
 
-/* MULTER CONFIGURATIONS */
+router.post(
+  "/getStudentProfile",
+  (req, res, next) => protectUser(req, res, next, "Student"),
+  getStudentProfile
+);
 
-/* APIs */
+module.exports = router;
