@@ -732,6 +732,58 @@ const generateReceipt = async (req, res) => {
   }
 };
 
+const getLastTenDaysCollection = async (req, res) => {
+  try {
+    // Calculate today's date
+    const today = new Date();
+
+    // Generate an array of dates for the last 10 days including today, in "10 March" format
+    const dates = Array.from({ length: 11 }, (_, i) => {
+      const date = new Date(today.getTime() - (10 - i) * 24 * 60 * 60 * 1000);
+      return (
+        date.toISOString().slice(8, 10) +
+        " " +
+        date.toLocaleString("default", { month: "long" })
+      );
+    });
+
+    // MongoDB aggregation pipeline to find payments made in the last 10 days
+    const lastTenDaysCollection = await FeeSchema.aggregate([
+      // Unwind the paidAmount array to denormalize it
+      { $unwind: { path: "$paidAmount", preserveNullAndEmptyArrays: true } },
+      // Group by date and sum the amount
+      {
+        $group: {
+          _id: { $dateToString: { format: "%d %B", date: "$paidAmount.date" } },
+          totalAmount: { $sum: "$paidAmount.amount" },
+        },
+      },
+      // Project the required fields
+      {
+        $project: {
+          _id: 0,
+          date: "$_id",
+          amount: { $ifNull: ["$totalAmount", 0] },
+        },
+      },
+      // Sort by date in ascending order
+      { $sort: { date: 1 } },
+    ]);
+
+    // Merge the array of dates with the payment data
+    const result = dates.map((date) => {
+      const payment = lastTenDaysCollection.find((item) => item.date === date);
+      return { date, amount: payment ? payment.amount : 0 };
+    });
+
+    // Send the result as response
+    res.status(200).json({ lastTenDaysCollection: result });
+  } catch (error) {
+    console.log("Error in getting collection details", error);
+    res.status(400).json({ message: "Error in generating receipt", error });
+  }
+};
+
 module.exports = {
   addNewFee,
   collectFee,
@@ -742,4 +794,5 @@ module.exports = {
   deleteFee,
   getDueFeeStudent,
   generateReceipt,
+  getLastTenDaysCollection,
 };
