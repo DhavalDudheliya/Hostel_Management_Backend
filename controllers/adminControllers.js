@@ -1473,17 +1473,15 @@ const allocateStudent = async (req, res) => {
     const { id } = req.params; // Block ID where we want to allocate the student
     const { roomNumber, rollNo } = req.body; // Room number and student ID
 
+
     const studentDoc = await Student.findOne({ rollNumber: rollNo });
-    // console.log(studentDoc);
+    if (studentDoc === "") {
+      return res.status(404).json({ message: "Student not found" });
+    }
     const studentId = studentDoc._id;
-    // console.log(studentId);
 
     // Check if the student is already allocated to another block
     const student = await Student.findById(studentId);
-
-    if (!student) {
-      return res.status(404).json({ message: "Student not found" });
-    }
 
     if (student.blockId) {
       // Student is already allocated to a block, deallocate from the current block

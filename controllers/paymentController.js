@@ -13,19 +13,11 @@ const checkout = async (req, res) => {
   };
   const fee = await instance.orders.create(options);
 
-  console.log(fee);
-
   return res.status(200).json({
     success: true,
     fee,
   });
 };
-
-// [Object: null prototype] {
-//     razorpay_payment_id: 'pay_NpKulbqOEbatwP',
-//     razorpay_order_id: 'order_NpKud4CqMyOb6L',
-//     razorpay_signature: 'a1c8c382920108b64c1a83a827fe8384455fa832a912f14eea6e466eb0cc59f5'
-//    }
 
 const paymentVerification = async (req, res) => {
   const feeId = req.query.feeId;
