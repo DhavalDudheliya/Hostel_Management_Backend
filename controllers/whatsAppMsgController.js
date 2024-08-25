@@ -1,11 +1,15 @@
 const { Client, LocalAuth } = require("whatsapp-web.js");
 const qrcode = require("qrcode-terminal");
+const puppeteer = require("puppeteer");
 
 let client;
 
-const initializeWhatsAppClient = () => {
+const initializeWhatsAppClient = async () => {
   client = new Client({
-    authStrategy: new LocalAuth(), // Saves the session to avoid re-scanning the QR code
+    authStrategy: new LocalAuth(),
+    puppeteer: {
+      executablePath: process.env.CHROME_BIN || puppeteer.executablePath(),
+    },
   });
 
   // Generate and display the QR code in the terminal
@@ -39,7 +43,7 @@ const sendWhatsAppMessage = async (req, res) => {
 
   console.log(WhatAppNumber);
   // Ensure the number starts with '91'
-  if (WhatAppNumber.startsWith("91") || WhatAppNumber.length === 12) {
+  if (!WhatAppNumber.startsWith("91") || !WhatAppNumber.length === 12) {
     return res.status(400).json({ message: "Whatsapp number is not coorect" });
   }
 

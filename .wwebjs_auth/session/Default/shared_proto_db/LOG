@@ -1,2 +1,3 @@
-2024/08/25-21:17:09.918 2878 Creating DB D:\Study\Projects\Mern\HostelManagment\backend\.wwebjs_auth\session\Default\shared_proto_db since it was missing.
-2024/08/25-21:17:10.078 2878 Reusing MANIFEST D:\Study\Projects\Mern\HostelManagment\backend\.wwebjs_auth\session\Default\shared_proto_db/MANIFEST-000001
+2024/08/25-22:38:39.029 3790 Reusing MANIFEST D:\Study\Projects\Mern\HostelManagment\backend\.wwebjs_auth\session\Default\shared_proto_db/MANIFEST-000001
+2024/08/25-22:38:39.030 3790 Recovering log #3
+2024/08/25-22:38:39.031 3790 Reusing old log D:\Study\Projects\Mern\HostelManagment\backend\.wwebjs_auth\session\Default\shared_proto_db/000003.log 
