@@ -4,7 +4,7 @@ const puppeteer = require("puppeteer");
 
 let client;
 
-const initializeWhatsAppClient = async () => {
+const initializeWhatsAppClient = () => {
   client = new Client({
     authStrategy: new LocalAuth(),
     puppeteer: {
