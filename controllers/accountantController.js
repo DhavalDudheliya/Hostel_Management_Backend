@@ -409,7 +409,12 @@ const generateReceipt = async (req, res) => {
 
     console.log(fee.paidAmount[paidSchemaIndex]);
 
-    const browser = await puppeteer.launch({ headless: true });
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: ["--no-sandbox", "--disable-setuid-sandbox"], // Essential for running in a headless environment like Render
+      executablePath: process.env.CHROME_BIN || null, // Use CHROME_BIN environment variable if set
+    });
+
     const page = await browser.newPage();
 
     // Set the content of the receipt
