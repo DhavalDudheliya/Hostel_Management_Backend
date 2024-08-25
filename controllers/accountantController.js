@@ -410,9 +410,9 @@ const generateReceipt = async (req, res) => {
     console.log(fee.paidAmount[paidSchemaIndex]);
 
     const browser = await puppeteer.launch({
+      executablePath: process.env.CHROME_BIN || puppeteer.executablePath(),
       headless: true,
-      args: ["--no-sandbox", "--disable-setuid-sandbox"], // Essential for running in a headless environment like Render
-      executablePath: process.env.CHROME_BIN || null, // Use CHROME_BIN environment variable if set
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
 
     const page = await browser.newPage();
