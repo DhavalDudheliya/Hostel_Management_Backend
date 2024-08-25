@@ -2,6 +2,8 @@ const Student = require("../models/studentProfile");
 const FeeSchema = require("../models/feesModel.js");
 const FeeMaster = require("../models/feeMasterModel");
 const puppeteer = require("puppeteer");
+const { Client, LocalAuth } = require("whatsapp-web.js");
+const qrcode = require("qrcode-terminal");
 
 const addNewFee = async (req, res) => {
   try {

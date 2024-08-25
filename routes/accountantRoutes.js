@@ -13,7 +13,7 @@ const {
   deleteFee,
   getDueFeeStudent,
   generateReceipt,
-  getLastTenDaysCollection
+  getLastTenDaysCollection,
 } = require("../controllers/accountantController");
 const { protectUser } = require("../middlewares/userProtect");
 
@@ -27,6 +27,6 @@ router.post("/deleteFee", deleteFee);
 router.post("/getDueFeeStudent", getDueFeeStudent);
 router.post("/generateReceipt", generateReceipt);
 router.get("/getLastTenDaysCollection", getLastTenDaysCollection);
-
+// router.post("/send", sendWhatsAppMessage);
 
 module.exports = router;

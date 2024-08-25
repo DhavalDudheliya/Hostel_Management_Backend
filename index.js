@@ -18,10 +18,12 @@ const userRouter = require("./routes/userRoutes");
 const accountantRouter = require("./routes/accountantRoutes");
 const leaveRouter = require("./routes/leaveRoutes");
 const paymentRouter = require("./routes/paymentRoutes");
-
 const reportRouter = require("./routes/reportRoutes");
-
+const messageRouter = require("./routes/messageRoutes");
 const noticeRouter = require("./routes/noticeRoutes");
+const {
+  initializeWhatsAppClient,
+} = require("./controllers/whatsAppMsgController");
 
 /* CONFIGURATIONS */
 dotenv.config();
@@ -57,6 +59,9 @@ connectDB();
 //   key_secret: process.env.ROZORPAY_API_SECRET,
 // });
 
+// Initialize WhatsApp client when the application starts
+initializeWhatsAppClient();
+
 /* APIs */
 app.use("/", userRouter);
 app.use("/admin", adminRouter);
@@ -70,6 +75,7 @@ app.use("/accountant", accountantRouter);
 app.use("/leave", leaveRouter);
 app.use("/api", paymentRouter);
 app.use("/student", studentRouter);
+app.use("/message", messageRouter);
 
 app.get("/api/getkey", (req, res) => {
   res.status(200).json({ key: process.env.ROZORPAY_API_KEY });
