@@ -9,6 +9,8 @@ const initializeWhatsAppClient = () => {
     authStrategy: new LocalAuth(),
     puppeteer: {
       executablePath: process.env.CHROME_BIN || puppeteer.executablePath(),
+      headless: true,
+      // args: ["--no-sandbox", "--disable-setuid-sandbox"],
     },
   });
 
